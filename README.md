@@ -27,7 +27,7 @@ dream of functionality wrapped in a user interface that actually makes sense.
 - [Crafted by a boatman with more loose screws than the argo](#️-crafted-by-a-boatman-with-more-loose-screws-than-the-argo)
 - [Multi-select because why stop at one](#-multi-select-because-why-stop-at-one)
 
-## 🎨 Paint Your Files Directories with Colors
+## 🎨 Paint Your Files & Directories with Colors
 ![image](https://github.com/user-attachments/assets/c2f5eb37-db4c-4706-9385-2a1ed3b8253c)
 
 In a stroke of genius (or possibly heatstroke), I devised a color-coding system that's as 
