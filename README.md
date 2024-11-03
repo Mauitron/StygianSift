@@ -289,6 +289,12 @@ iambic pentameter).
 - 
 
 ## Installation
+### Requirements
+- Rust (latest stable version)
+- A terminal that supports:
+  - Unicode characters
+  - True Color (for the full visual experience)
+  - Size of at least 80x24
 
 
 ### Build from Source
@@ -302,8 +308,10 @@ cargo build --release
 
 # The binary will be located at
 ./target/release/StygianSift
+```
 
 ### Make Globally Available (Optional)
+```bash
 On Unix-like systems (Linux, macOS), you can make the program available system-wide:
 
 # Copy to your system's binary directory
@@ -312,13 +320,6 @@ sudo cp ./target/release/StygianSift /usr/local/bin/
 # Now you can run StygianSift from any directory
 StygianSift
 ```
-
-### Requirements
-- Rust (latest stable version)
-- A terminal that supports:
-  - Unicode characters
-  - True Color (for the full visual experience)
-  - Size of at least 80x24
 
 ### First Run
 ```bash
