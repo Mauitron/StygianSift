@@ -344,7 +344,7 @@ Common issues and their solutions:
 - **Colors not displaying**: Ensure terminal supports true color
 - **Performance issues**: Adjust search depth and preview settings
 
-Remember, in Stygian Sift, I don't just think outside the box. I fold the box into a fancy 
+Remember, in Stygian Sift, we don't just think outside the box. We fold the box into a fancy 
 hat and wear it! Why? because it looks snazzy. May your code be buggy in interesting ways, 
 and may you always find that one file you swear you put somewhere "logical"!
 
