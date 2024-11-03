@@ -286,17 +286,47 @@ iambic pentameter).
 - Size calculations
 - Inode information
 - Hard link counting
+- 
 
 ## Installation
 
-```bash
-# Install via cargo
-cargo install stygian-sift
 
-# Or build from source
-git clone https://github.com/username/stygian-sift
-cd stygian-sift
+### Build from Source
+```bash
+# Clone the repository
+git clone https://github.com/Mauitron/StygianSift.git
+cd StygianSift
+
+# Build the release version
 cargo build --release
+
+# The binary will be located at
+./target/release/StygianSift
+
+### Make Globally Available (Optional)
+On Unix-like systems (Linux, macOS), you can make the program available system-wide:
+
+# Copy to your system's binary directory
+sudo cp ./target/release/StygianSift /usr/local/bin/
+
+# Now you can run StygianSift from any directory
+StygianSift
+```
+
+### Requirements
+- Rust (latest stable version)
+- A terminal that supports:
+  - Unicode characters
+  - True Color (for the full visual experience)
+  - Size of at least 80x24
+
+### First Run
+```bash
+# Run directly
+./target/release/StygianSift
+
+# Or if installed system-wide
+StygianSift
 ```
 
 ## Common Workflows
