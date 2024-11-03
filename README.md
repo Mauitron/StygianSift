@@ -49,9 +49,7 @@ decoration - they're a full permission and operation control system:
 - Use filters to view only files of specific colors
 
 ## 🚀 Shortcuts That Actually Make Your Life Shorter (in a good way)
-
-![image](https://github.com/user-attachments/assets/3ca96b6a-147b-477f-844c-df5e0ad8c1d6)
-
+![image](https://github.com/user-attachments/assets/4c3375cc-c574-46e2-a74c-041f778bac64)
 
 - Basic shortcuts (0-9) for your most-used directories
 - Shift + numbers for setting new shortcuts
