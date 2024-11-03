@@ -349,9 +349,9 @@ never been more satisfying!
 - Master the search filters for quick file finding
 - Utilize git integration for repo management (comming soon!)
 
-## Keyboard Shortcut Reference
+## Keyboard Bindings Reference
 
-Here are some common shortcuts:
+Here are some common Bindings to get you started:
 
 | Category    | Action           | Default Key |
 |------------|------------------|-------------|
