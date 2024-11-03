@@ -29,7 +29,6 @@ dream of functionality wrapped in a user interface that actually makes sense.
 ## 🎨 Paint Your Files Directories with Colors
 ![image](https://github.com/user-attachments/assets/c2f5eb37-db4c-4706-9385-2a1ed3b8253c)
 
-
 In a stroke of genius (or possibly heatstroke), I devised a color-coding system that's as 
 powerful as it is perplexing:
 
@@ -37,10 +36,12 @@ powerful as it is perplexing:
 - Yellow: "Caution: May contain traces of genius or utter nonsense"
 - Blue: "Stable as a three-legged chair, but it'll do"
 - Green: "Free to modify, or turn into digital origami, whatever floats your boat"
+- (Pun very much intended)
 
 Plot twist: YOU get to decide what these colors mean. It's like playing god with your file 
 system, but less smiting and more organizing! These chromatic enchantments go beyond mere 
 decoration - they're a full permission and operation control system:
+![image](https://github.com/user-attachments/assets/41dd9787-f83e-4e97-81c5-9e0bfc7088d0)
 
 - Define whether files can be deleted, moved, or renamed per color
 - Control whether colored files appear in searches
@@ -83,7 +84,7 @@ Navigate through your directories with the grace of a digital dryad. Sort, filte
 traverse your file system, and look cool doing it!
 
 - Entries fade based on distance from your selection
-- Customizable dimming intensity and distance
+- Customizable dimming intensity and distance (in code only at the moment)
 - Color and brightness preservation for important items
 - Visual breadcrumbs through directory structures
 - Instant feedback on current location
@@ -97,7 +98,7 @@ recommended)
 
 - Set your editor of choice (I won't judge... much)
 - Open files with a keystroke, because who has time for double-clicking?
-- As always, Return to Stygian's realm when you're done, because yes.
+- As always, Return to the Stygian realm when you're done, because yes.
 
 ## 🕳️ The Undo System: Your Safety Net in the Void
 
@@ -108,8 +109,6 @@ Stygian Sift implements a sophisticated undo system that would make time travele
 - Configurable storage limits for both RAM and disk
 - Preserves file metadata and permissions
 - Handles multiple file operations
-- Undo stack survives program restarts
-- Automatic cleanup of old undo data
 
 ## 👁️ Preview Pane: Your Window into File Souls
 ![image](https://github.com/user-attachments/assets/ef755418-c5ab-4d40-9b34-aa17b71eb46c)
@@ -118,12 +117,10 @@ The preview pane is more than just a pretty face:
 
 - Handles massive files without breaking a sweat
 - Smart file type detection
-- Syntax highlighting for code
 - Hex view for binary files
 - Directory tree previews
 - Metadata display
 - Customizable preview size
-- Automatic encoding detection
 
 ## 📊 Metadata Mania
 
@@ -137,19 +134,7 @@ Dive deeper into your files' naughty secret little lives:
 - Owner and group information
 - Inode details
 - Hard link count
-
-## Installation
-
-```bash
-# Install via cargo
-cargo install stygian-sift
-
-# Or build from source
-git clone https://github.com/username/stygian-sift
-cd stygian-sift
-cargo build --release
-```
-
+  
 ## 💾 The Config File: Your Digital Diary
 
 Your preferences, remembered:
@@ -172,6 +157,18 @@ iambic pentameter).
 - Flexibility: Adapt it to your workflow, not the other way around.
 - Fun: Because if you're not laughing while managing files... well, you shouldn't. I am 
   being told that isn't normal, and that people are concerned.
+  
+## Installation
+
+```bash
+# Install via cargo
+cargo install stygian-sift
+
+# Or build from source
+git clone https://github.com/username/stygian-sift
+cd stygian-sift
+cargo build --release
+```
 
 ## Common Workflows
 
@@ -190,7 +187,7 @@ never been more satisfying!
 - Use color coding to protect important directories
 - Set up shortcuts for frequent locations
 - Master the search filters for quick file finding
-- Utilize git integration for repo management
+- Utilize git integration for repo management (comming soon!)
 
 ## Keyboard Shortcut Reference
 
