@@ -1,4 +1,4 @@
-# Stygian Sift: Navigate the Digital Styx with a Touch of Madness
+# StygianSift: Navigate the Digital Styx
 ![image](https://github.com/user-attachments/assets/ffbc17f2-7f52-4f32-bd49-4d439b5dd0b6)
 If you like StygianSift please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
 ## 📚 Embark on a Slightly Unhinged File Management Adventure
