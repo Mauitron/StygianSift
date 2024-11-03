@@ -27,7 +27,8 @@ dream of functionality wrapped in a user interface that actually makes sense.
 - [Multi-select because why stop at one](#-multi-select-because-why-stop-at-one)
 
 ## 🎨 Paint Your Files Directories with Colors
-![image](https://github.com/user-attachments/assets/5f2de4e9-461e-4ce2-b108-b5538570f65d)
+![image](https://github.com/user-attachments/assets/c2f5eb37-db4c-4706-9385-2a1ed3b8253c)
+
 
 In a stroke of genius (or possibly heatstroke), I devised a color-coding system that's as 
 powerful as it is perplexing:
