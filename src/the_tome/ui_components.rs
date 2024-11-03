@@ -1243,8 +1243,10 @@ pub fn display_folder_preview(
 // Add shortcut layers for more customization.
 // Maybe ctrl + numbers for layers. allowing for 100 shortcuts
 pub fn display_shortcuts(app_state: &AppState, stdout: &mut impl Write) -> io::Result<()> {
-    let (width, _height) = size()?;
+    let (width, height) = size()?;
     let nav_width = width / 2;
+    let preview_width = width - nav_width - 2;
+
 
     let _ = clear_nav();
     let _ = clear_preview();
@@ -1282,7 +1284,7 @@ pub fn display_shortcuts(app_state: &AppState, stdout: &mut impl Write) -> io::R
     }
 
     execute!(stdout, SetForegroundColor(Color::Green))?;
-    execute!(stdout, MoveTo(nav_width / 3 - 9, 13))?;
+    queue!(stdout, MoveTo(preview_width + 23, height - 9))?;
     writeln!(stdout, "\nPress any key to return to the browser.\r")?;
 
     execute!(stdout, MoveTo(nav_width / 3 - 20, 10))?;
