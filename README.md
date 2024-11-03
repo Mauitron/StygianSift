@@ -118,6 +118,7 @@ The preview pane is more than just a pretty face:
 
 - Handles massive files without breaking a sweat
 - Smart file type detection
+- Text for you coding files
 - Hex view for binary files
 - Directory tree previews
 - Metadata display
