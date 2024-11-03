@@ -188,6 +188,7 @@ iambic pentameter).
 
 # Navigation Features
 - Directory traversal (up/down/enter/back)
+- Navigate by search
 - Jump to parent directory
 - Jump to top/bottom of list
 - Shortcut system (0-9 keys)
@@ -205,12 +206,10 @@ iambic pentameter).
 
 # Search Capabilities
 - Fuzzy file search
-- File name search
 - Color-based filtering
 - Configurable search depth
 - Real-time search results
 - Search within current directory (will include files. TBA)
-- Search result navigation
 
 # Preview Features
 - File content preview
