@@ -33,7 +33,7 @@ dream of functionality wrapped in a user interface that actually makes sense.
 In a stroke of genius (or possibly heatstroke), I devised a color-coding system that's as 
 powerful as it is perplexing:
 
-- Red: "Touch not, lest ye awaken the Cerberus!" (Or just corrupt your build, same thing)
+- Red: "Touch not, lest ye awaken Cerberus!" (Or just corrupt your build, same thing)
 - Yellow: "Caution: May contain traces of genius or utter nonsense"
 - Blue: "Stable as a three-legged chair, but it'll do"
 - Green: "Free to modify, or turn into digital origami, whatever floats your boat"
