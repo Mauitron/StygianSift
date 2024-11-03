@@ -118,8 +118,8 @@ Select files and folders with the enthusiasm of a kid in a candy store. Bulk ope
 never been more satisfying!
 
 1. Enter select mode with `Ctrl+t`
-2. Mark files with by normal navigation
-3. Perform operations (copy, move, delete) on selection
+2. Mark files with by holding `Shift` and normal navigation
+3. Perform operations (copy, move, delete etc) on selection
 4. Exit select mode with `Esc`
 
 You can also just hold shift and move... but that just standard stuff.
