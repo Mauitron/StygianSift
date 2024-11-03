@@ -110,6 +110,19 @@ StygianSift implements a sophisticated undo system that would make time traveler
 - Configurable storage limits for both RAM and disk
 - Preserves file metadata and permissions
 - Handles multiple file operations
+- 
+## ✨ Multi-select Because Why Stop at One
+![image](https://github.com/user-attachments/assets/46360bd7-e027-4743-b783-3792ad5b9ff2)
+
+Select files and folders with the enthusiasm of a kid in a candy store. Bulk operations have 
+never been more satisfying!
+
+1. Enter select mode with `Ctrl+t`
+2. Mark files with by normal navigation
+3. Perform operations (copy, move, delete) on selection
+4. Exit select mode with `Esc`
+
+You can also just hold shift and move... but that just standard stuff.
 
 ## 👁️ Preview Pane: Your Window into File Souls
 ![image](https://github.com/user-attachments/assets/ef755418-c5ab-4d40-9b34-aa17b71eb46c)
@@ -287,9 +300,9 @@ iambic pentameter).
 - Size calculations
 - Inode information
 - Hard link counting
-- 
 
 ## Installation
+
 ### Requirements
 - Rust (latest stable version)
 - A terminal that supports:
@@ -330,18 +343,6 @@ StygianSift
 # Or if installed system-wide
 StygianSift
 ```
-
-## Common Workflows
-
-## ✨ Multi-select Because Why Stop at One
-
-Select files and folders with the enthusiasm of a kid in a candy store. Bulk operations have 
-never been more satisfying!
-
-1. Enter select mode with `Ctrl+t`
-2. Mark files with `Space`
-3. Perform operations (copy, move, delete) on selection
-4. Exit select mode with `Esc`
 
 ### Power User Tips
 
