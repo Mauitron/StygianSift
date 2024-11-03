@@ -10,9 +10,9 @@ Created by a slightly unhinged boatman who spent way too much time ferrying soul
 muttering about directory structures, this isn't your average file manager. It's a fever 
 dream of functionality wrapped in a user interface that actually makes sense.
 
-## 💤 TLDR Feature List
+
 ## Features and Capabilities
-- [TLDR Feature List](#-tldr-feature-list)
+- [I Don't Have Time! Show Me the Feature List!](#-tldr-feature-list)
 - [Paint your files directories with colors](#-paint-your-files-directories-with-colors)
 - [Shortcuts that actually make your life shorter in a good way](#-shortcuts-that-actually-make-your-life-shorter-in-a-good-way)
 - [Terminal-based because real programmers dont click](#%EF%B8%8F-terminal-based-because-real-programmers-dont-click)
