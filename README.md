@@ -1,4 +1,5 @@
 # Stygian Sift: Navigate the Digital Styx with a Touch of Madness
+![image](https://github.com/user-attachments/assets/a9185908-44ba-4939-bae2-c4b9f57f5a20)
 
 ## Features and Capabilities
 - [Terminal-based because real programmers dont click](#terminal-based-because-real-programmers-dont-click) [↑](#stygian-sift-navigate-the-digital-styx-with-a-touch-of-madness)
