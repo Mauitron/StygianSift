@@ -10,8 +10,9 @@ Created by a slightly unhinged boatman who spent way too much time ferrying soul
 muttering about directory structures, this isn't your average file manager. It's a fever 
 dream of functionality wrapped in a user interface that actually makes sense.
 
+## 💤 TLDR Feature List
 ## Features and Capabilities
-
+- [Don't Have Time! Show Me The Feature List!](#-tldr-feature-list)
 - [Paint your files directories with colors](#-paint-your-files-directories-with-colors)
 - [Shortcuts that actually make your life shorter in a good way](#-shortcuts-that-actually-make-your-life-shorter-in-a-good-way)
 - [Terminal-based because real programmers dont click](#%EF%B8%8F-terminal-based-because-real-programmers-dont-click)
@@ -157,7 +158,135 @@ iambic pentameter).
 - Flexibility: Adapt it to your workflow, not the other way around.
 - Fun: Because if you're not laughing while managing files... well, you shouldn't. I am 
   being told that isn't normal, and that people are concerned.
-  
+
+
+## 💤 TLDR Feature List
+# Core File Operations
+- Create files
+- Create directories
+- Delete files/directories
+- Move files/directories
+- Copy files/directories
+- Rename files (with or without extension preservation)
+- Duplicate files/directories
+- Execute files
+- Open files in external editor
+
+# Navigation Features
+- Directory traversal (up/down/enter/back)
+- Jump to parent directory
+- Jump to top/bottom of list
+- Shortcut system (0-9 keys)
+- Directory history tracking
+- Custom directory naming for shortcuts
+- Position memory in directories
+
+# Selection System
+- Single file selection
+- Multi-file selection
+- Range selection
+- Selection toggle
+- Select all
+- Clear selection
+
+# Search Capabilities
+- Fuzzy file search
+- File name search
+- Color-based filtering
+- Configurable search depth
+- Real-time search results
+- Search within current directory (will include files. TBA)
+- Search result navigation
+
+# Preview Features
+- File content preview
+- Directory preview
+- Preview size adjustment
+- File metadata display
+- Large file handling
+- Binary file handling
+
+# Color Management
+- Color coding files/directories
+- Color-based operation rules
+- Color cascading in directories
+- Color filtering
+- Color-based search
+- Color toggle
+- Color cycling
+
+# Sort Options
+- Name (ascending/descending)
+- Type (ascending/descending)
+- Size (ascending/descending)
+- Date modified (ascending/descending)
+- Color (ascending/descending)
+
+# Undo System
+- RAM-based undo storage
+- Disk-based undo storage
+- Configurable storage limits
+- Operation history
+- Multiple operation types support
+- Automatic cleanup
+
+# Git Integration
+- Git status display
+- Repository detection
+- Unstabled features in code, if you want to try it out.
+
+# UI Features
+- Dynamic borders
+- Responsive layout
+- File type icons
+- Permission indicators
+- Scroll indicators
+- Directory size display
+- File count display (for search)
+- Multi-column layout
+
+# Terminal Integration
+- Terminal command execution
+- Working directory preservation
+- Command output display
+- Return to browser state
+
+# Configuration
+- Keybinding customization
+- Color rule configuration
+- Editor selection
+- Line count adjustment
+- Search depth limits
+- Undo storage limits
+- Shortcut management
+
+# Protection Features
+- Color-based operation restrictions
+- Permission checking
+- Admin requirement detection
+- Read-only enforcement
+- Operation validation
+- Recursive permission checking
+
+# Display Features
+- Dynamic dimming
+- Color preservation
+- Text wrapping
+- Long filename handling
+- Status line display
+- Help menu
+- Metadata display
+
+# File Information
+- Basic metadata
+- Extended attributes
+- Ownership details
+- Permission strings
+- Timestamp information
+- Size calculations
+- Inode information
+- Hard link counting
+
 ## Installation
 
 ```bash
@@ -191,7 +320,7 @@ never been more satisfying!
 
 ## Keyboard Shortcut Reference
 
-Here are some of the most commonly used shortcuts:
+Here are some common shortcuts:
 
 | Category    | Action           | Default Key |
 |------------|------------------|-------------|
