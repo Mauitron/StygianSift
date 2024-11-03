@@ -3,7 +3,7 @@
 If you like StygianSift please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
 ## 📚 Embark on a Slightly Unhinged File Management Adventure
 
-Lost in the labyrinth of your project files? Fear not, for Stygian Sift is here to guide you 
+Lost in the labyrinth of your project files? Fear not, for StygianSift is here to guide you 
 through the digital underworld. Inspired by ME, Charon, the mythical ferryman, this tool will 
 navigate you through the rivers of data and forests of directories with unparalleled ease. 
 Created by a slightly unhinged boatman who spent way too much time ferrying souls and 
@@ -64,7 +64,7 @@ decoration - they're a full permission and operation control system:
 
 Embrace the command line, mortal! Navigate your files with the wild abandon of the 
 caffeinated genius that you are! If you need more, summon the terminal within the selected 
-directory to perform more complex commands. Return to Stygian Sift when you're done, no 
+directory to perform more complex commands. Return to StygianSift when you're done, no 
 breadcrumbs needed. Who needs pointing devices when your coding-pinkies could bench more than 
 you? Ask yourself, Why point-and-click when you can type-and-curse?
 
@@ -77,7 +77,7 @@ Make the interface dance to your tune. Remap keys until your muscle memory sings
 ![image](https://github.com/user-attachments/assets/d33e391f-7799-4f42-bdcb-20fd9d7321c1)
 
 I mean, you can look for what ever you want... I understand your hands might be busy, The 
-stygian fuzzy search understands your intentions, even if your fingers don't.
+Stygian Fuzzy Search™ understands your intentions, even if your fingers don't.
 
 ## 🌳 Navigational Tree Sorcery
 
@@ -92,7 +92,7 @@ traverse your file system, and look cool doing it!
 
 ## 📝 BYOE (Bring Your Own Editor)
 
-Tired of fighting with vs code? Nostalgic for your trusty notepad? Fear not! Stygian Sift 
+Tired of fighting with vs code? Nostalgic for your trusty notepad? Fear not! StygianSift 
 lets you summon your preferred text editor to put quill to parchment! Why wouldn't you want 
 tools to do your work right at your fingertips? (Terminal based text editors highly 
 recommended)
@@ -103,7 +103,7 @@ recommended)
 
 ## 🕳️ The Undo System: Your Safety Net in the Void
 
-Stygian Sift implements a sophisticated undo system that would make time travelers jealous:
+StygianSift implements a sophisticated undo system that would make time travelers jealous:
 
 - RAM-based undo for quick operations
 - Disk storage for larger operations 
@@ -293,7 +293,7 @@ iambic pentameter).
 - Rust (latest stable version)
 - A terminal that supports:
   - Unicode characters
-  - True Color (for the full visual experience)
+  - True Color (for using the color system)
   - Size of at least 80x24
 
 
@@ -375,11 +375,11 @@ Common issues and their solutions:
 - **Colors not displaying**: Ensure terminal supports true color
 - **Performance issues**: Adjust search depth and preview settings
 
-Remember, in Stygian Sift, we don't just think outside the box. We fold the box into a fancy 
+Remember, in StygianSift, we don't just think outside the box. We fold the box into a fancy 
 hat and wear it! Why? because it looks snazzy. May your code be buggy in interesting ways, 
 and may you always find that one file you swear you put somewhere "logical"!
 
 P.S. No refunds, exchanges, or soul-backsies. Apparently 1 Obol is far below minimum wage. 
 All sales are final!
 
-P.P.S Stygian Sift is a work in progress. Visual bugs are to be expected.
+P.P.S StygianSift is a work in progress. Visual bugs are to be expected.
