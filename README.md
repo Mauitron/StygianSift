@@ -73,6 +73,7 @@ you? Ask yourself, Why point-and-click when you can type-and-curse?
 Make the interface dance to your tune. Remap keys until your muscle memory sings with joy.
 
 ## 🔍 Fuzzy Search: Summon Files with But a Whisper of Their True Name
+![image](https://github.com/user-attachments/assets/d33e391f-7799-4f42-bdcb-20fd9d7321c1)
 
 I mean, you can look for what ever you want... I understand your hands might be busy, The 
 stygian fuzzy search understands your intentions, even if your fingers don't.
