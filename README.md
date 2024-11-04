@@ -13,9 +13,9 @@ dream of functionality wrapped in a user interface that actually makes sense.
 
 ## Features and Capabilities
 - ## [I Don't Have Time! Summarize it for me!](#-tldr-feature-list)
+- [Terminal-based because real programmers dont click](#%EF%B8%8F-terminal-based-because-real-programmers-dont-click)
 - [Paint your files directories with colors](#-paint-your-files-directories-with-colors)
 - [Shortcuts that actually make your life shorter in a good way](#-shortcuts-that-actually-make-your-life-shorter-in-a-good-way)
-- [Terminal-based because real programmers dont click](#%EF%B8%8F-terminal-based-because-real-programmers-dont-click)
 - [Customizable keybindings bend the very interface to your will](#️-customizable-keybindings-bend-the-very-interface-to-your-will)
 - [Fuzzy search summon files with but a whisper of their true name](#-fuzzy-search-summon-files-with-but-a-whisper-of-their-true-name)
 - [Navigational tree sorcery](#-navigational-tree-sorcery)
@@ -26,6 +26,14 @@ dream of functionality wrapped in a user interface that actually makes sense.
 - [The config file your digital diary](#-the-config-file-your-digital-diary)
 - [Crafted by a boatman with more loose screws than the argo](#️-crafted-by-a-boatman-with-more-loose-screws-than-the-argo)
 - [Multi-select because why stop at one](#-multi-select-because-why-stop-at-one)
+
+## 🖥️ Terminal-based Because Real Programmers Dont Click
+
+Embrace the command line, mortal! Navigate your files with the wild abandon of the 
+caffeinated genius that you are! If you need more, summon the terminal within the selected 
+directory to perform more complex commands. Return to StygianSift when you're done, no 
+breadcrumbs needed. Who needs pointing devices when your coding-pinkies could bench more than 
+you? Ask yourself, Why point-and-click when you can type-and-curse?
 
 ## 🎨 Paint Your Files & Directories with Colors
 ![image](https://github.com/user-attachments/assets/c2f5eb37-db4c-4706-9385-2a1ed3b8253c)
@@ -59,14 +67,6 @@ decoration - they're a full permission and operation control system:
 - Each shortcut remembers your position in that directory
 - Name your shortcuts for better organization
 - Quick-jump between related directories
-
-## 🖥️ Terminal-based Because Real Programmers Dont Click
-
-Embrace the command line, mortal! Navigate your files with the wild abandon of the 
-caffeinated genius that you are! If you need more, summon the terminal within the selected 
-directory to perform more complex commands. Return to StygianSift when you're done, no 
-breadcrumbs needed. Who needs pointing devices when your coding-pinkies could bench more than 
-you? Ask yourself, Why point-and-click when you can type-and-curse?
 
 ## ⌨️ Customizable Keybindings: Bend the Very Interface to Your Will
 ![image](https://github.com/user-attachments/assets/03fbe400-5a89-4a6c-9fd4-087230c396e4)
