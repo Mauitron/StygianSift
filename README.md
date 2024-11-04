@@ -10,13 +10,12 @@ Created by a slightly unhinged boatman who spent way too much time ferrying soul
 muttering about directory structures, this isn't your average file manager. It's a fever 
 dream of functionality wrapped in a user interface that actually makes sense.
 
-
 ## Features and Capabilities
 - ## [I Don't Have Time! Summarize it for me!](#-tldr-feature-list)
 - [Terminal-based because real programmers dont click](#%EF%B8%8F-terminal-based-because-real-programmers-dont-click)
 - [Paint your files & directories with colors](#-paint-your-files--directories-with-colors)
 - [Shortcuts that actually make your life shorter in a good way](#-shortcuts-that-actually-make-your-life-shorter-in-a-good-way)
-- [Customizable keybindings bend the very interface to your will](#-customizable-keybindings-bend-the-very-interface-to-your-will)
+- [Customizable keybindings bend the very interface to your will](#-customizable-keybindings--bend-the-very-interface-to-your-will)
 - [Fuzzy search summon files with but a whisper of their true name](#-fuzzy-search-summon-files-with-but-a-whisper-of-their-true-name)
 - [Navigational tree sorcery](#-navigational-tree-sorcery)
 - [A Sexy Interface](#-a-visually-seductive-interface...-which-is-not-a-wierd-thing-to-say!)
