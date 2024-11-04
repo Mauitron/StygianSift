@@ -113,9 +113,9 @@ StygianSift implements a sophisticated undo system that would make time traveler
 - 
 ## ✨ Multi-select Because Why Stop at One
 ![image](https://github.com/user-attachments/assets/46360bd7-e027-4743-b783-3792ad5b9ff2)
-
-Select files and folders with the enthusiasm of a kid in a candy store. Bulk operations have 
-never been more satisfying!
+You want to impress that girl over there? Show here how massive your file operations are!
+Why settle for manipulating just one file when you can wrangle a whole herd? The multi-select
+feature makes file operations a whole lot more convenient:
 
 1. Enter select mode with `Ctrl+t`
 2. Mark files with by holding `Shift` and normal navigation
@@ -375,6 +375,8 @@ Common issues and their solutions:
 - **Colors not displaying**: Ensure terminal supports true color
 - **Performance issues**: Adjust search depth and preview settings
 
+Ready to turn your digital realm from the mundane to the insane? Grab StygianSift today
+and embark on a file odyssey like no other! Your friend will be both jealous and amazed!
 Remember, in StygianSift, we don't just think outside the box. We fold the box into a fancy 
 hat and wear it! Why? because it looks snazzy. May your code be buggy in interesting ways, 
 and may you always find that one file you swear you put somewhere "logical"!
