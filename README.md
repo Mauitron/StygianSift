@@ -307,7 +307,6 @@ iambic pentameter).
 - A terminal that supports:
   - Unicode characters
   - True Color (for using the color system)
-  - Size of at least 80x24
 
 
 ### Build from Source
