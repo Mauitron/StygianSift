@@ -38,7 +38,7 @@ This is where things get a bit more structured (but still pretty simple):
 
 ### Larger Companies (Annual Revenue $1M+)
 * Need a commercial license
-* Contact me at [Mauritz.Nyfeldt@gmail.com] - I promise we'll keep it simple
+* Contact me at Mauritz.Nyfeldt@gmail.com - I promise we'll keep it simple
 * We'll work out fair terms that work for everyone
 
 ## What About Contributing Back?
