@@ -19,6 +19,7 @@ dream of functionality wrapped in a user interface that actually makes sense.
 - [Customizable keybindings bend the very interface to your will](#️-customizable-keybindings-bend-the-very-interface-to-your-will)
 - [Fuzzy search summon files with but a whisper of their true name](#-fuzzy-search-summon-files-with-but-a-whisper-of-their-true-name)
 - [Navigational tree sorcery](#-navigational-tree-sorcery)
+- [Sexy Interface](#a-visually-seductive-interface...-which-is-not-a-wierd-thing-to-say!)
 - [BYOE bring your own editor](#-byoe-bring-your-own-editor)
 - [The undo resurrect your files from the dead](#️-the-undo-system-your-safety-net-in-the-void)
 - [Preview pane peek into files or directories](#️-preview-pane-your-window-into-file-souls)
@@ -81,9 +82,16 @@ Stygian Fuzzy Search™ understands your intentions, even if your fingers don't.
 
 ## 🌳 Navigational Tree Sorcery
 
-Navigate through your directories with the grace of a digital dryad. Sort, filter, and 
-traverse your file system, and look cool doing it!
+Who says trees only grow one way? With StygianSift, your file tree is a
+shape-shifting marvel:
 
+- Sort by name, size, date, or the phase of the moon (okay, maybe not that last
+  one)
+- Alphabetical today, chronological tomorrow, size-based when you're feeling
+  judgmental
+- Watch your directories dance in excitement as they do your bidding!
+
+## 🤤 A Visually Seductive Interface... Which is Not a Wierd Thing to Say!
 - Entries fade based on distance from your selection
 - Customizable dimming intensity and distance (in code only at the moment)
 - Color and brightness preservation for important items
@@ -124,7 +132,7 @@ feature makes file operations a whole lot more convenient:
 
 You can also just hold shift and move... but that just standard stuff.
 
-## 👁️ Preview Pane: Your Window into File Souls
+## 👁️ Preview Pane: Your Window into the Souls of Your Files
 ![image](https://github.com/user-attachments/assets/ef755418-c5ab-4d40-9b34-aa17b71eb46c)
 
 The preview pane is more than just a pretty face:
