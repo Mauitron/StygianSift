@@ -1,7 +1,7 @@
 # StygianSift License
 ## A Note from the Creator
 
-Hey there! I built StygianSift because I love making file management both powerful and fun. Before we get into the details, here's the most important thing: if you're an individual user, you're free to explore, modify, and play with StygianSift however you want! Just remember to give a friendly credit back to the project. That's really all I ask.
+Hey there! I built StygianSift an a passion project. For making file management both powerful and fun. Before we get into the details, here's the most important thing: if you're an individual user, you're free to explore, modify, and play with StygianSift however you want! Just remember to give a friendly credit back to the project. That's really all I ask.
 
 ## Individual Users - Your Freedom to Create!
 If you're an individual user, here's what you can do (and yes, it's a lot!):
