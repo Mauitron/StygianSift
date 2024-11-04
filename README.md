@@ -1,6 +1,6 @@
 # StygianSift: Navigate the Digital Styx
 ![image](https://github.com/user-attachments/assets/ffbc17f2-7f52-4f32-bd49-4d439b5dd0b6)
-If you like StygianSift please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
+If you like StygianSift or want to see more from me, please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
 ## 📚 Embark on a Slightly Unhinged File Management Adventure
 
 Lost in the labyrinth of your project files? Fear not, for StygianSift is here to guide you 
