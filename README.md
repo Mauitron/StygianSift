@@ -20,7 +20,7 @@ dream of functionality wrapped in a user interface that actually makes sense.
 - [Navigational tree sorcery](#-navigational-tree-sorcery)
 - [A Sexy Interface](#-a-visually-seductive-interface-which-is-not-a-wierd-thing-to-say)
 - [BYOE bring your own editor](#-byoe-bring-your-own-editor)
-- [The undo resurrect your files from the dead](#-the-undo-system-your-safety-net-in-the-void)
+- [Resurrect your files from the dead](#️-the-undo-system-your-safety-net-in-the-void)
 - [Preview pane peek into files or directories](#-preview-pane-your-window-into-file-souls)
 - [Metadata mania](#-metadata-mania)
 - [The config file your digital diary](#-the-config-file-your-digital-diary)
