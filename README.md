@@ -12,7 +12,7 @@ dream of functionality wrapped in a user interface that actually makes sense.
 
 
 ## Features and Capabilities
-- [I Don't Have Time! Show Me the Feature List!](#-tldr-feature-list)
+- ## [I Don't Have Time! Show Me the Feature List!](#-tldr-feature-list)
 - [Paint your files directories with colors](#-paint-your-files-directories-with-colors)
 - [Shortcuts that actually make your life shorter in a good way](#-shortcuts-that-actually-make-your-life-shorter-in-a-good-way)
 - [Terminal-based because real programmers dont click](#%EF%B8%8F-terminal-based-because-real-programmers-dont-click)
