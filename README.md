@@ -21,7 +21,7 @@ dream of functionality wrapped in a user interface that actually makes sense.
 - [A Sexy Interface](#-a-visually-seductive-interface-which-is-not-a-wierd-thing-to-say)
 - [BYOE bring your own editor](#-byoe-bring-your-own-editor)
 - [Resurrect your files from the dead](#️-the-undo-system-your-safety-net-in-the-void)
-- [Preview pane peek into files or directories](#-preview-pane--your-window-into-souls-of-your-files)
+- [Preview pane peek into files or directories](#-the-preview-pane--your-window-into-souls-of-your-files)
 - [Metadata mania](#-metadata-mania)
 - [The config file your digital diary](#-the-config-file-your-digital-diary)
 - [Crafted by a boatman with more loose screws than the argo](#️-crafted-by-a-boatman-with-more-loose-screws-than-the-argo)
@@ -131,7 +131,7 @@ feature makes file operations a whole lot more convenient:
 
 You can also just hold shift and move... but that just standard stuff.
 
-## 👁️ Preview Pane: Your Window into the Souls of Your Files
+## 👁️ The Preview Pane: Your Window into the Souls of Your Files
 ![image](https://github.com/user-attachments/assets/ef755418-c5ab-4d40-9b34-aa17b71eb46c)
 
 The preview pane is more than just a pretty face:
