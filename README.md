@@ -182,7 +182,7 @@ iambic pentameter).
 
 
 ## 💤 TLDR Feature List
-# Core File Operations
+### Core File Operations
 - Create files
 - Create directories
 - Delete files/directories
@@ -193,7 +193,7 @@ iambic pentameter).
 - Execute files
 - Open files in external editor
 
-# Navigation Features
+### Navigation Features
 - Directory traversal (up/down/enter/back)
 - Navigate by search
 - Jump to parent directory
@@ -203,7 +203,7 @@ iambic pentameter).
 - Custom directory naming for shortcuts
 - Position memory in directories
 
-# Selection System
+### Selection System
 - Single file selection
 - Multi-file selection
 - Range selection
@@ -211,14 +211,14 @@ iambic pentameter).
 - Select all
 - Clear selection
 
-# Search Capabilities
+### Search Capabilities
 - Fuzzy file search
 - Color-based filtering
 - Configurable search depth
 - Real-time search results
 - Search within current directory (will include files. TBA)
 
-# Preview Features
+### Preview Features
 - File content preview
 - Directory preview
 - Preview size adjustment
@@ -226,7 +226,7 @@ iambic pentameter).
 - Large file handling
 - Binary file handling
 
-# Color Management
+### Color Management
 - Color coding files/directories
 - Color-based operation rules
 - Color cascading in directories
@@ -235,14 +235,14 @@ iambic pentameter).
 - Color toggle
 - Color cycling
 
-# Sort Options
+### Sort Options
 - Name (ascending/descending)
 - Type (ascending/descending)
 - Size (ascending/descending)
 - Date modified (ascending/descending)
 - Color (ascending/descending)
 
-# Undo System
+### Undo System
 - RAM-based undo storage
 - Disk-based undo storage
 - Configurable storage limits
@@ -250,12 +250,12 @@ iambic pentameter).
 - Multiple operation types support
 - Automatic cleanup
 
-# Git Integration
+### Git Integration
 - Git status display
 - Repository detection
 - Unstabled features in code, if you want to try it out.
 
-# UI Features
+### UI Features
 - Dynamic borders
 - Responsive layout
 - File type icons
@@ -265,13 +265,13 @@ iambic pentameter).
 - File count display (for search)
 - Multi-column layout
 
-# Terminal Integration
+### Terminal Integration
 - Terminal command execution
 - Working directory preservation
 - Command output display
 - Return to browser state
 
-# Configuration
+### Configuration
 - Keybinding customization
 - Color rule configuration
 - Editor selection
@@ -280,7 +280,7 @@ iambic pentameter).
 - Undo storage limits
 - Shortcut management
 
-# Protection Features
+### Protection Features
 - Color-based operation restrictions
 - Permission checking
 - Admin requirement detection
@@ -288,7 +288,7 @@ iambic pentameter).
 - Operation validation
 - Recursive permission checking
 
-# Display Features
+### Display Features
 - Dynamic dimming
 - Color preservation
 - Text wrapping
@@ -297,7 +297,7 @@ iambic pentameter).
 - Help menu
 - Metadata display
 
-# File Information
+### File Information
 - Basic metadata
 - Extended attributes
 - Ownership details
