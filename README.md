@@ -21,7 +21,7 @@ dream of functionality wrapped in a user interface that actually makes sense.
 - [A Sexy Interface](#-a-visually-seductive-interface-which-is-not-a-wierd-thing-to-say)
 - [BYOE bring your own editor](#-byoe-bring-your-own-editor)
 - [Resurrect your files from the dead](#️-the-undo-system-your-safety-net-in-the-void)
-- [Preview pane peek into files or directories](#️--the-preview-pane-your-window-into-souls-of-your-files)
+- [Preview pane peek into files or directories](#-the-preview-pane-your-window-into-souls-of-your-files)
 - [Metadata mania](#-metadata-mania)
 - [The config file your digital diary](#-the-config-file-your-digital-diary)
 - [Crafted by a boatman with more loose screws than the argo](#️-crafted-by-a-boatman-with-more-loose-screws-than-the-argo)
