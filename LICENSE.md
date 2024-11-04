@@ -27,6 +27,12 @@ Any form of support helps keep this project growing!
 ## For Professional or Commercial Users
 If you're using StygianSift in a commercial context—whether for freelance work, in a business, or for paid projects—I simply ask that you consider supporting the project in a way that reflects the value it brings to your work. There's no fixed amount, just what feels fair and reasonable.
 
+While StygianSift remains free for individual users, educational institutions, 
+and small organizations, any company with annual revenue exceeding $1M must 
+obtain a commercial license by contacting []. This helps protect the 
+project from exploitation while maintaining its trust-based nature for the 
+community it aims to serve.
+
 For those interested in incorporating StygianSift into a commercial product, please reach out so we can discuss a suitable arrangement.
 
 ## The Trust Factor
