@@ -18,7 +18,7 @@ dream of functionality wrapped in a user interface that actually makes sense.
 - [Customizable keybindings bend the very interface to your will](#️-customizable-keybindings-bend-the-very-interface-to-your-will)
 - [Fuzzy search summon files with but a whisper of their true name](#-fuzzy-search-summon-files-with-but-a-whisper-of-their-true-name)
 - [Navigational tree sorcery](#-navigational-tree-sorcery)
-- [A Sexy Interface](#-a-visually-seductive-interface---which-is-not-a-wierd-thing-to-say!)
+- [A Sexy Interface](#-a-visually-seductive-interface----which-is-not-a-wierd-thing-to-say!)
 - [BYOE bring your own editor](#-byoe-bring-your-own-editor)
 - [The undo resurrect your files from the dead](#-the-undo-system-your-safety-net-in-the-void)
 - [Preview pane peek into files or directories](#-preview-pane-your-window-into-file-souls)
