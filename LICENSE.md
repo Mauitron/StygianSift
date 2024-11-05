@@ -38,7 +38,7 @@ This is where things get a bit more structured (but still pretty simple):
 
 ### Larger Companies (Annual Revenue $1M+)
 * Need a commercial license
-* Contact me at Mauritz.Nyfeldt@gmail.com - I promise we'll keep it simple
+* Contact me at Maui_The_Magnificent@proton.me - I promise we'll keep it simple
 * We'll work out fair terms that work for everyone
 
 ## What About Contributing Back?
@@ -58,7 +58,7 @@ While this license emphasizes freedom and trust, it is still a legal agreement. 
 
 ## Let's Connect!
 I'd love to hear from you:
-* 📧 Email: Stygian.Ferryman69@gmail.com
+* 📧 Email: Maui_The_Magnificent@proton.me
 * 💭 Share how you're using StygianSift
 * 💡 Send your ideas and feedback
 * 👋 Just say hello!
