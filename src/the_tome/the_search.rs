@@ -36,7 +36,7 @@ fn parse_color_search(search_term: &str) -> (Option<MarkerColor>, String) {
     ];
 
     color_prefixes
-        .par_iter() // Parallelize color prefix checking
+        .par_iter()
         .find_first(|(prefix, _)| search_term.to_lowercase().starts_with(prefix))
         .map(|(prefix, color)| (Some(*color), search_term[prefix.len()..].to_string()))
         .unwrap_or((None, search_term.to_string()))
