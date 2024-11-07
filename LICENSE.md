@@ -2,7 +2,7 @@
 
 Hey there,
 
-Let me be completely direct about this - I built StygianSift because I don't think things should be boring, seemingly, to be boring less boring,
+Let me be completely direct about this - I built StygianSift because I don't think things should be boring, seemingly, just to be boring,
 
 ## What You Can Do (No Legal Strings Attached)
 You can:
