@@ -129,7 +129,7 @@ feature makes file operations a whole lot more convenient:
 3. Perform operations (copy, move, delete etc) on selection
 4. Exit select mode with `Esc`
 
-You can also just hold shift and move... but that just standard stuff.
+You can also just hold shift and move... but that's just standard stuff.
 
 ## 👁️ The Preview Pane: Your Window into the Souls of Your Files
 ![image](https://github.com/user-attachments/assets/ef755418-c5ab-4d40-9b34-aa17b71eb46c)
@@ -391,4 +391,5 @@ and may you always find that one file you swear you put somewhere "logical"!
 P.S. No refunds, exchanges, or soul-backsies. Apparently 1 Obol is far below minimum wage. 
 All sales are final!
 
-P.P.S StygianSift is a work in progress. Visual bugs are to be expected.
+P.P.S StygianSift is a work in progress. Please report any bugs you find.
+Visual bugs are expected to be the most common ones.
