@@ -76,8 +76,6 @@ pub fn open_file_with_editor(
     Ok(())
 }
 
-const PREVIEW_LIMIT: usize = 5 * 1024; // 50 KB
-
 pub fn read_new_sort(stdout: &mut impl Write) -> io::Result<SortOrder> {
     let (width, height) = size()?;
     let nav_width = width / 2;

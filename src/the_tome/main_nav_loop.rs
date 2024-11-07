@@ -39,8 +39,8 @@ pub fn browse_fuzzy_file(app_state: &mut AppState) -> io::Result<BrowseResult> {
     let (width, height) = size()?;
     let visible_lines = (height - 9) as usize;
     let middle_line = visible_lines / 2;
-    let end_y = height - 2;
-    let start_y = 7;
+    let _end_y = height - 2;
+    let _start_y = 7;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;
 

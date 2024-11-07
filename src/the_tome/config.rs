@@ -14,8 +14,6 @@
  * to the original project.
  */
 
-use std::usize;
-
 use super::*;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ColorRule {
@@ -826,7 +824,7 @@ pub fn manage_shortcuts(app_state: &mut AppState, stdout: &mut impl Write) -> io
     let (width, height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;
-    clear_nav();
+    let _ = clear_nav();
     loop {
         // execute!(stdout, Clear(ClearType::All))?;
         queue!(stdout, MoveTo(preview_width + 30, height - 38))?;
@@ -936,11 +934,11 @@ pub fn read_new_shortcut(
     let name = read_line()?;
     let index = app_state.nav_stack[app_state.nav_stack.len() - 1].index;
     if path.exists() {
-        clear_nav();
+        let _ = clear_nav();
         queue!(stdout, MoveTo(preview_width + 3, height - 10))?;
         Ok((key, path, name, index))
     } else {
-        clear_nav();
+        let _ = clear_nav();
         queue!(stdout, MoveTo(preview_width + 3, height - 10))?;
         Err(io::Error::new(
             io::ErrorKind::InvalidInput,

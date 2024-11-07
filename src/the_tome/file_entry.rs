@@ -96,6 +96,7 @@ impl FileEntry {
 
     #[cfg(unix)]
     fn check_permissions(path: &Path, metadata: &fs::Metadata) -> (bool, bool) {
+        let _ = path;
         use std::os::unix::fs::MetadataExt;
         let mode = metadata.mode();
         let uid = metadata.uid();

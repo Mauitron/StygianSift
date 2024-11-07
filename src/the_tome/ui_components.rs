@@ -42,9 +42,9 @@ impl DimmingConfig {
     pub fn new(visible_lines: usize) -> Self {
         let (width, height) = size().unwrap();
         let end_y = height - 16;
-        let start_y = 5;
+        let _start_y = 5;
         let nav_width = width / 2;
-        let preview_width = width - nav_width - 2;
+        let _preview_width = width - nav_width - 2;
         // you can choose the maximum distance based on visible lines.
         // if you are afraid of the dark. make it brighter!
         // use about 1/3 of visible lines as max distance for dimming
@@ -700,7 +700,9 @@ fn display_file_info_or_preview(
     is_preview: bool,
     page_state: &mut PageState,
 ) -> io::Result<()> {
-    let (width, height) = size()?;
+    let _ = preview_width;
+    let _ = nav_width;
+    let (width, _height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;
 
@@ -1041,6 +1043,7 @@ pub fn display_directory(
     visible_lines: usize,
     full_redraw: bool,
 ) -> io::Result<()> {
+    let _ = visible_lines;
     let (width, height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;
@@ -1246,8 +1249,6 @@ pub fn display_shortcuts(app_state: &AppState, stdout: &mut impl Write) -> io::R
     let (width, height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;
-
-
     let _ = clear_nav();
     let _ = clear_preview();
 

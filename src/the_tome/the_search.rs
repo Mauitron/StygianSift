@@ -36,7 +36,7 @@ fn parse_color_search(search_term: &str) -> (Option<MarkerColor>, String) {
     ];
 
     color_prefixes
-        .par_iter()
+        .par_iter() // Parallelize color prefix checking
         .find_first(|(prefix, _)| search_term.to_lowercase().starts_with(prefix))
         .map(|(prefix, color)| (Some(*color), search_term[prefix.len()..].to_string()))
         .unwrap_or((None, search_term.to_string()))
@@ -479,7 +479,7 @@ pub fn display_search_results(
 
                     Action::GoToBottom => {
                         if g_pressed {
-                            selected_index = (results.len() - 1);
+                            selected_index = results.len() - 1;
                             if results.len() > (visible_lines) as usize {
                                 scroll_offset = (results.len()) - visible_lines as usize;
                             }
@@ -508,7 +508,7 @@ pub fn display_search_results(
                             &mut selected_index,
                             &mut scroll_offset,
                         );
-                        let mut a = current_dir()?;
+                        let a = current_dir()?;
                         get_sorted_entries(&app_state, a.as_path(), &sort_order)?;
                     }
                     Action::MoveDown => {
@@ -610,7 +610,7 @@ pub fn display_search_results(
                     Action::Murder => {
                         murder_files(app_state, stdout, &results, selected_index)?;
                         results.retain(|entry| entry.path.exists());
-                        selected_index = selected_index.min((results.len() - 1));
+                        selected_index = selected_index.min(results.len() - 1);
                     }
                     Action::Copy => {
                         copy_files(app_state, &results, selected_index);
