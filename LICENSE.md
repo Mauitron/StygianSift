@@ -14,10 +14,10 @@ You can:
 - Pretty much anything else you can think of
 
 ## All I Ask
-Just keep my name and a link back to the original project somewhere visible - that's it. attribution is what is important to me, 
+Just keep my header attribution notice (can be found in the source code), and a link back to the original project somewhere visible - that's it. attribution is what is important to me, 
 
 # For Companies
-If your company makes over $1M a year, let's chat about licensing (Maui_The_Magnificent@proton.me). For everyone else, go wild - build cool stuff!
+If your company has a Net Income of over $1M a year, let's chat about licensing (Maui_The_Magnificent@proton.me). For everyone else, go wild - build cool stuff!
 
 ## To The Open Source Community
 I want to be crystal clear - you are safe to use, modify, and share this code. There won't be any surprise legal actions or licensing changes. I chose this approach because I believe in trust and community over legal threats.
