@@ -7,7 +7,7 @@
  * https://github.com/Mauitron/StygianSift.git
  *
  * Created by: Maui The Magnificent (Charon)
- * Contact: Maui_The_Magnificent@proton.me 
+ * Contact: Maui_The_Magnificent@proton.me
  *
  * When using, modifying, or distributing this software,
  * please maintain this attribution notice and provide a link
@@ -193,10 +193,16 @@ fn add_green_tint(color: Color) -> Color {
         }
     }
 }
+pub fn cleanup_terminal() -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+    execute!(stdout, MoveTo(0, 0))?;
+    execute!(stdout, Show)?;
 
-pub fn cleanup_terminal(stdout: &mut impl Write) -> io::Result<()> {
-    execute!(stdout, Clear(ClearType::All), MoveTo(0, 0), cursor::Show)?;
-    terminal::disable_raw_mode()
+    disable_raw_mode()?;
+
+    stdout.flush()?;
+    Ok(())
 }
 
 #[rustfmt::skip]

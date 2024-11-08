@@ -7,7 +7,7 @@
  * https://github.com/Mauitron/StygianSift.git
  *
  * Created by: Maui The Magnificent (Charon)
- * Contact: Maui_The_Magnificent@proton.me 
+ * Contact: Maui_The_Magnificent@proton.me
  *
  * When using, modifying, or distributing this software,
  * please maintain this attribution notice and provide a link
@@ -175,7 +175,6 @@ pub fn handle_use_shortcut(
             writeln!(stdout, "{}", "Error: Shortcut not found".red())?;
         }
     }
-    // let _ = clear_preview();
     Ok(())
 }
 
@@ -201,6 +200,7 @@ pub fn handle_quit(
         Ok(false)
     } else {
         // Uncomment to add back confirmation to quit
+
         // queue!(stdout, MoveTo(preview_width + 27, height - 10))?;
         // write!(stdout, "{}", "Are you sure you want to quit?".green())?;
         // queue!(stdout, MoveTo(preview_width + 40, height - 9))?;
@@ -208,6 +208,7 @@ pub fn handle_quit(
         // let quit = read_line().expect("error");
         // let quit_options = vec!["y", "Y", "yes", "Yes", "YES"];
         // Ok(quit_options.contains(&quit.as_str()))
+        cleanup_terminal()?;
         Ok(true)
     }
 }
