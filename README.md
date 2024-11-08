@@ -315,6 +315,35 @@ iambic pentameter).
   - Unicode characters
   - True Color (for using the color system)
 
+## Font Requirements
+
+StygianSift requires a Nerd Font to display icons correctly. The recommended font is:
+
+- **JetBrainsMono Nerd Font** (Primary font used in development)
+
+Alternative compatible fonts:
+- Any Nerd Font variant (FiraCode, Hack, DroidSansMono, Iosevka)
+
+### Installing the Required Font
+
+#### Method 1: Download directly
+1. Visit [Nerd Fonts website](https://www.nerdfonts.com/font-downloads)
+2. Download "JetBrainsMono Nerd Font"
+3. Install the font on your system
+
+#### Method 2: Package Manager
+- **Nix**: `nerdfonts.override { fonts = [ "JetBrainsMono" ]; }`
+- **Ubuntu/Debian**: `sudo apt install fonts-jetbrains-mono-nerd`
+- **Arch**: `sudo pacman -S ttf-jetbrains-mono-nerd`
+- **MacOS**: `brew tap homebrew/cask-fonts && brew install --cask font-jetbrains-mono-nerd-font`
+
+After installing the font, make sure your terminal emulator is configured to use "JetBrainsMono Nerd Font" or "JetBrainsMono NF".
+
+If icons are not displaying correctly, check that:
+1. The font is installed properly
+2. Your terminal is using the Nerd Font variant
+3. Your terminal supports Unicode and true color
+
 
 ### Build from Source
 ```bash
