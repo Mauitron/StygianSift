@@ -199,17 +199,16 @@ pub fn handle_quit(
         writeln!(stdout, "File move cancelled.")?;
         Ok(false)
     } else {
-        // Uncomment to add back confirmation to quit
-
-        // queue!(stdout, MoveTo(preview_width + 27, height - 10))?;
-        // write!(stdout, "{}", "Are you sure you want to quit?".green())?;
-        // queue!(stdout, MoveTo(preview_width + 40, height - 9))?;
-        // write!(stdout, "{}/{}", "Y".red(), "N".red())?;
-        // let quit = read_line().expect("error");
-        // let quit_options = vec!["y", "Y", "yes", "Yes", "YES"];
-        // Ok(quit_options.contains(&quit.as_str()))
+        
+        queue!(stdout, MoveTo(preview_width + 27, height - 10))?;
+        write!(stdout, "{}", "Are you sure you want to quit?".green())?;
+        queue!(stdout, MoveTo(preview_width + 40, height - 9))?;
+        write!(stdout, "{}/{}", "Y".red(), "N".red())?;
+        queue!(stdout, MoveTo(preview_width + 40, height - 8))?;
+        let quit = read_line().expect("error, not a valid command");
+        let quit_options = vec!["y", "Y", "yes", "Yes", "YES"];
         cleanup_terminal()?;
-        Ok(true)
+        Ok(quit_options.contains(&quit.as_str()))
     }
 }
 
