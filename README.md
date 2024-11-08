@@ -315,8 +315,6 @@ iambic pentameter).
   - Unicode characters
   - True Color (for using the color system)
 
-## Font Requirements
-
 StygianSift requires a Nerd Font to display icons correctly. The recommended font is:
 
 - **JetBrainsMono Nerd Font** (Primary font used in development)
@@ -324,7 +322,7 @@ StygianSift requires a Nerd Font to display icons correctly. The recommended fon
 Alternative compatible fonts:
 - Any Nerd Font variant (FiraCode, Hack, DroidSansMono, Iosevka)
 
-### Installing the Required Font
+#### Installing the Required Font
 
 #### Method 1: Download directly
 1. Visit [Nerd Fonts website](https://www.nerdfonts.com/font-downloads)
