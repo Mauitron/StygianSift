@@ -380,6 +380,8 @@ StygianSift
 ### Power User Tips
 
 - Use color coding to protect important directories
+- Map the keybindings to what feels best for you
+- Add your text-editor so you can start work from within StygianSift
 - Set up shortcuts for frequent locations
 - Master the search filters for quick file finding
 - Utilize git integration for repo management (comming soon!)
