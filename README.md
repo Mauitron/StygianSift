@@ -3,7 +3,7 @@
 ### If you like StygianSift or want to see more from me, please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
 
 ## Features and Capabilities
-- ## [I Don't Have Time! Summarize it for me!](#-tldr-feature-list)
+## [I Don't Have Time! Summarize it for me!](#-tldr-feature-list)
 - [Terminal-based because real programmers dont click](#%EF%B8%8F-terminal-based-because-real-programmers-dont-click)
 - [Paint your files & directories with colors](#-paint-your-files--directories-with-colors)
 - [Shortcuts that actually make your life shorter in a good way](#-shortcuts-that-actually-make-your-life-shorter-in-a-good-way)
