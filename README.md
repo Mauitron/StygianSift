@@ -1,14 +1,6 @@
 # StygianSift: Navigate the Digital Styx
 ![image](https://github.com/user-attachments/assets/ffbc17f2-7f52-4f32-bd49-4d439b5dd0b6)
 ### If you like StygianSift or want to see more from me, please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
-## 📚 Embark on a Slightly Unhinged File Management Adventure
-
-Lost in the labyrinth of your project files? Fear not, for StygianSift is here to guide you 
-through the digital underworld. Inspired by ME, Charon, the mythical ferryman, this tool will 
-navigate you through the rivers of data and forests of directories with unparalleled ease. 
-Created by a slightly unhinged boatman who spent way too much time ferrying souls and 
-muttering about directory structures, this isn't your average file manager. It's a fever 
-dream of functionality wrapped in a user interface that actually makes sense.
 
 ## Features and Capabilities
 - ## [I Don't Have Time! Summarize it for me!](#-tldr-feature-list)
@@ -26,6 +18,15 @@ dream of functionality wrapped in a user interface that actually makes sense.
 - [The config file your digital diary](#-the-config-file-your-digital-diary)
 - [Crafted by a boatman with more loose screws than the argo](#️-crafted-by-a-boatman-with-more-loose-screws-than-the-argo)
 - [Multi-select because why stop at one](#-multi-select-because-why-stop-at-one)
+
+## 📚 Embark on a Slightly Unhinged File Management Adventure
+
+Lost in the labyrinth of your project files? Fear not, for StygianSift is here to guide you 
+through the digital underworld. Inspired by ME, Charon, the mythical ferryman, this tool will 
+navigate you through the rivers of data and forests of directories with unparalleled ease. 
+Created by a slightly unhinged boatman who spent way too much time ferrying souls and 
+muttering about directory structures, this isn't your average file manager. It's a fever 
+dream of functionality wrapped in a user interface that actually makes sense.
 
 ## 🖥️ Terminal-based Because Real Programmers Dont Click
 
