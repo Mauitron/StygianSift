@@ -538,23 +538,6 @@ pub fn default_keybindings() -> HashMap<KeyEvent, Action> {
 
         Ok(config)
     }
-    pub fn has_shortcut_for_path(&self, path: &PathBuf) -> Option<char> {
-        self.shortcuts.as_ref().and_then(|shortcuts| {
-            shortcuts
-                .iter()
-                .find(|(_, &ref p)| p.0 == *path)
-                .map(|(&k, _)| k)
-        })
-    }
-
-    pub fn remove_shortcut(&mut self, key: char) {
-        if let Some(shortcuts) = self.shortcuts.as_mut() {
-            shortcuts.remove(&key);
-            if shortcuts.is_empty() {
-                self.shortcuts = None;
-            }
-        }
-    }
 
     pub fn get_config_path() -> std::io::Result<PathBuf> {
         let mut path = std::env::current_dir()?;

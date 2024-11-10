@@ -16,79 +16,70 @@
 
 // Should be removed when the annoyence is no longer present.
 // comlexity might always be there.
+
+#[macro_export]
+macro_rules! interaction_field {
+    ($($arg:tt)*) => {
+        interaction_field(format_args!($($arg)*))
+    };
+}
+
 #[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod browser_commands;
-#[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod config;
-#[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod file_entry;
-#[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod main_nav_loop;
-#[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod marvelous_actions;
-#[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod nav_functions;
-#[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod system_functions;
-#[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod the_search;
-#[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod tome_state;
-#[allow(clippy::complexity, dead_code, clippy::if_same_then_else)]
 pub mod ui_components;
 
 //////////////////////////////////////////DEPENDENCIES///////////////////////////////////////////////
 // If possible, do not add any more dependencies. Rather work to remove them.
-
-pub use crossterm::cursor::{Hide, MoveTo, Show};
-pub use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
-pub use crossterm::style::{
-    Attribute, Color, ResetColor, SetAttribute, SetBackgroundColor, SetForegroundColor,
-    StyledContent, Stylize,
+pub use crossterm::{
+    cursor::{Hide, MoveTo, Show},
+    event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
+    style::{
+        Attribute, Color, ResetColor, SetAttribute, SetBackgroundColor, SetForegroundColor,
+        StyledContent, Stylize,
+    },
+    terminal::{
+        disable_raw_mode, enable_raw_mode, size, Clear, ClearType, EnterAlternateScreen,
+        LeaveAlternateScreen, SetSize,
+    },
+    {cursor, execute, queue, terminal},
 };
-pub use crossterm::terminal::{
-    disable_raw_mode, enable_raw_mode, size, Clear, ClearType, EnterAlternateScreen,
-    LeaveAlternateScreen, SetSize,
-};
-pub use crossterm::{cursor, execute, queue, terminal};
 
-pub use rayon::iter::{IntoParallelIterator, IntoParallelRefIterator, ParallelIterator};
 pub use rayon::prelude::*;
+
 /////////////////////////////////////////!DEPENDENCIES!//////////////////////////////////////////////
+pub use std::{
+    cmp::Ordering,
+    collections::{BTreeMap, HashMap, HashSet, VecDeque},
+    env,
+    fmt::{Arguments, Display, Formatter, Result as OtherResult},
+    fs::{self, File, OpenOptions},
+    io::{self, stdout, BufRead, Read, Write},
+    os::unix::fs::MetadataExt,
+    path::{Path, PathBuf},
+    process::{Child, Command, Stdio},
+    result::Result,
+    slice::Iter,
+    str::FromStr,
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
+    usize,
+};
 
-pub use std::cmp::Ordering;
-pub use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
-pub use std::env::{self};
-pub use std::fmt::{Display, Formatter, Result as OtherResult};
-pub use std::fs::{self, File, OpenOptions};
-pub use std::io::{self, stdout, BufRead, Read, Write};
-pub use std::os::unix::fs::MetadataExt;
-pub use std::path::{Path, PathBuf};
-pub use std::process::{Child, Command, Stdio};
-pub use std::result::Result;
-pub use std::slice::Iter;
-pub use std::str::FromStr;
-pub use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-use std::usize;
-use std::{io::Cursor, sync::Mutex};
-
-pub use super::the_tome::browser_commands::*;
-pub use super::the_tome::config::*;
-pub use super::the_tome::file_entry::*;
-pub use super::the_tome::marvelous_actions::*;
-pub use super::the_tome::nav_functions::*;
-pub use super::the_tome::system_functions::*;
-pub use super::the_tome::the_search::*;
-pub use super::the_tome::tome_state::*;
-pub use super::the_tome::ui_components::*;
+pub use self::{
+    browser_commands::*, config::*, file_entry::*, marvelous_actions::*, nav_functions::*,
+    system_functions::*, the_search::*, tome_state::*, ui_components::*,
+};
 
 pub const INPUT_TIMEOUT: Duration = Duration::from_secs(30);
 pub const MAX_NAME_LENGTH: usize = 255;
 pub const VISIBLE_LINES: usize = 35;
 pub const DEFAULT_RAM_LIMIT: usize = 500 * 1024 * 1024;
 pub const DEFAULT_DISK_LIMIT: u64 = 2 * 1024 * 1024 * 1024;
-pub const PREVIEW_LIMIT: usize = 5 * 1024; // 50 KB
-                                           // pub const SCROLL_SPEED: f32 = 0.3; //Not enabled, will try to smooth things out later. play with this to control smoothness (0.0 to 1.0)
-                                           // pub const MIDDLE_OFFSET: f32 = VISIBLE_LINES / 2.0;
-                                           // pub const INPUT_TIMEOUT: Duration = Duration::from_secs(30);
-                                           // pub const MAX_NAME_LENGTH: usize = 255;
+pub const PREVIEW_LIMIT: usize = 5 * 1024;

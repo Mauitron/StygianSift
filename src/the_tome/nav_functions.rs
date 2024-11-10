@@ -92,26 +92,11 @@ pub fn handle_layer_rename(
 ) -> io::Result<()> {
     let current_layer = app_state.config.current_layer;
 
-    queue!(stdout, MoveTo(preview_width + 3, height - 12))?;
-    write!(
-        stdout,
-        "{}",
-        "-".green().to_string().repeat((preview_width - 4).into())
-    )?;
-
-    queue!(stdout, MoveTo(preview_width + 23, height - 10))?;
-    writeln!(stdout, "Enter new name for current layer:")?;
-
-    queue!(stdout, MoveTo(preview_width + 3, height - 8))?;
-    write!(
-        stdout,
-        "{}",
-        "-".green().to_string().repeat((preview_width - 4).into())
-    )?;
-
+    let _ = interaction_field!("Enter new layer name: ");
     stdout.flush()?;
 
-    queue!(stdout, MoveTo(preview_width + 37, height - 9))?;
+    queue!(stdout, MoveTo(preview_width + 45, height - 10))?;
+    queue!(stdout, SetForegroundColor(Color::Red))?;
     let new_name = read_line()?;
     if !new_name.trim().is_empty() {
         app_state
@@ -120,6 +105,7 @@ pub fn handle_layer_rename(
         app_state.config.save_config()?;
     }
     let _ = clear_interaction_field();
+    queue!(stdout, SetForegroundColor(Color::Reset))?;
     Ok(())
 }
 
@@ -168,24 +154,14 @@ pub fn handle_set_shortcut(
         _ => unreachable!(),
     };
 
-    queue!(stdout, MoveTo(preview_width + 3, height - 12))?;
-    write!(
-        stdout,
-        "{}",
-        "-".green().to_string().repeat((preview_width - 4).into())
-    )?;
-    queue!(stdout, MoveTo(preview_width + 23, height - 10))?;
-    writeln!(stdout, "Enter a name for this shortcut:")?;
-    queue!(stdout, MoveTo(preview_width + 3, height - 8))?;
-    write!(
-        stdout,
-        "{}",
-        "-".green().to_string().repeat((preview_width - 4).into())
-    )?;
-    stdout.flush()?;
-    queue!(stdout, MoveTo(preview_width + 37, height - 9))?;
+    interaction_field!("Enter a name for this shortcut:")?;
     queue!(stdout, SetForegroundColor(Color::Red))?;
+    queue!(
+        stdout,
+        MoveTo((preview_width * 11 / 8) + 18 as u16, height - 10)
+    )?;
     let shortcut_name = read_line()?.red();
+
     queue!(stdout, SetForegroundColor(Color::Reset))?;
 
     let current_layer = app_state.config.current_layer;
@@ -252,20 +228,16 @@ pub fn handle_use_shortcut(
             *selected_index = entries.iter().position(|e| e.path == *path).unwrap_or(0);
             *scroll_offset = 0;
         } else {
-            queue!(stdout, MoveTo(preview_width + 30, height - 10))?;
-            writeln!(stdout, "{}", "Error: Invalid shortcut path".red())?;
+            let _ = clear_interaction_field();
+            interaction_field!("{}", "Error: Invalid shortcut path".red())?;
         }
     } else {
-        queue!(stdout, MoveTo(preview_width + 30, height - 10))?;
-        writeln!(
-            stdout,
-            "{}",
-            format!(
-                "No shortcut '{}' in layer '{}'",
-                c, app_state.config.shortcut_layers[current_layer].name
-            )
-            .red()
-        )?;
+        let _ = clear_interaction_field();
+        return interaction_field!(
+            "No shortcut '{}' in layer '{}'",
+            c.green(),
+            app_state.config.shortcut_layers[current_layer].name
+        );
     }
     Ok(())
 }
@@ -275,13 +247,15 @@ pub fn handle_quit(app_state: &mut AppState, stdout: &mut impl Write) -> io::Res
         return Ok(false);
     }
 
+    let _ = clear_interaction_field();
     if app_state.is_moving {
         let (width, height) = size()?;
         let nav_width = width / 2;
         let preview_width = width - nav_width - 2;
         app_state.cancel_move();
-        queue!(stdout, MoveTo(preview_width + 28, height - 12))?;
-        writeln!(stdout, "File move cancelled.")?;
+
+        let _ = clear_interaction_field();
+        interaction_field!("File move cancelled.")?;
         Ok(false)
     } else {
         let (width, height) = size()?;
@@ -367,9 +341,6 @@ pub fn handle_open_in_editor(
     height: u16,
     g_pressed: &mut bool,
 ) -> io::Result<()> {
-    let (width, _) = size()?;
-    let nav_width = width / 2;
-    let preview_width = width - nav_width - 2;
     if !*g_pressed {
         if let Some(entry) = entries.get(selected_index as usize) {
             if entry.file_type != FileType::Directory {
@@ -384,8 +355,8 @@ pub fn handle_open_in_editor(
                         )?;
                     }
                     Err(e) => {
-                        queue!(stdout, MoveTo(preview_width + 28, height - 12))?;
-                        writeln!(stdout, "Error opening file: {}", e)?;
+                        let _ = clear_interaction_field();
+                        interaction_field!("Error opening file: {}", e)?;
                     }
                 }
             }
@@ -401,18 +372,16 @@ pub fn handle_duplicate(
     entries: &[FileEntry],
     selected_index: usize,
 ) -> io::Result<()> {
-    let (width, height) = size()?;
-    let nav_width = width / 2;
-    let preview_width = width - nav_width - 2;
+    let _ = clear_interaction_field();
     if let Some(_entry) = entries.get(selected_index as usize) {
         match duplicate_files(stdout, app_state, entries, Some(selected_index)) {
             Ok(_) => {
-                queue!(stdout, MoveTo(preview_width + 28, height - 12))?;
-                writeln!(stdout, "File duplicated successfully.")?;
+                let _ = clear_interaction_field();
+                interaction_field!("File duplicated successfully.")?;
             }
             Err(e) => {
-                queue!(stdout, MoveTo(preview_width + 28, height - 12))?;
-                writeln!(stdout, "Error duplicating file: {}", e)?;
+                let _ = clear_interaction_field();
+                interaction_field!("Error duplicating file: {}", e)?;
             }
         }
         let _ = clear_nav();
@@ -430,31 +399,31 @@ pub fn handle_move_item(
     let (width, height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;
+    let _ = clear_interaction_field();
     if let Some(entry) = entries.get(selected_index as usize) {
         if app_state.is_moving {
             match app_state.finish_move(current_dir) {
                 Ok(_) => {
-                    queue!(stdout, MoveTo(preview_width + 28, height - 12))?;
-                    writeln!(stdout, "File(s) moved successfully.")?;
+                    let _ = clear_interaction_field();
+                    interaction_field!("File(s) moved successfully.")?;
                 }
                 Err(e) => {
-                    queue!(stdout, MoveTo(preview_width + 28, height - 12))?;
-                    writeln!(stdout, "Error moving file(s): {}", e)?;
+                    let _ = clear_interaction_field();
+                    interaction_field!("Error moving file(s): {}", e)?;
                     app_state.cancel_move();
                 }
             }
         } else {
             match app_state.start_move(Some(entry)) {
                 Ok(_) => {
-                    queue!(stdout, MoveTo(preview_width + 28, height - 12))?;
-                    writeln!(
-                        stdout,
+                    let _ = clear_interaction_field();
+                    interaction_field!(
                         "Moving file(s). Press 'm' again to place them in the current directory."
                     )?;
                 }
                 Err(e) => {
-                    queue!(stdout, MoveTo(preview_width + 28, height - 12))?;
-                    writeln!(stdout, "Error: {}", e)?;
+                    let _ = clear_interaction_field();
+                    interaction_field!("Error: {}", e)?;
                 }
             }
         }
@@ -510,8 +479,8 @@ pub fn handle_git_menu(
             }
         }
     } else {
-        execute!(stdout, MoveTo(0, height - 2))?;
-        writeln!(stdout, "Not a Git repository")?;
+        let _ = clear_interaction_field();
+        interaction_field!("Not a Git repository")?;
     }
     Ok(())
 }
@@ -711,6 +680,7 @@ pub fn handle_move_updown(
     is_search: bool,
 ) -> io::Result<()> {
     app_state.changing_color = false;
+    let _ = clear_interaction_field();
     let (width, height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;

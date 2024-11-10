@@ -148,45 +148,23 @@ impl AppState {
 
         let (layer_index, layer_name) = self.config.get_current_layer_info();
 
-        queue!(stdout, MoveTo(preview_width + 3, height - 12))?;
-        write!(
-            stdout,
-            "{}",
-            "-".green().to_string().repeat((preview_width - 4).into())
-        )?;
-
         queue!(stdout, MoveTo(preview_width + 28, height - 10))?;
-        writeln!(
-            stdout,
-            "Current Layer: {} ({})",
-            layer_index,
-            layer_name.green()
-        )?;
-
-        queue!(stdout, MoveTo(preview_width + 3, height - 8))?;
-        write!(
-            stdout,
-            "{}",
-            "-".green().to_string().repeat((preview_width - 4).into())
-        )?;
+        interaction_field!("Current Layer: {} ({})", layer_index, layer_name.green())?;
 
         stdout.flush()?;
         Ok(())
     }
+
     pub fn execute_file(&self, stdout: &mut impl Write, file_path: &Path) -> io::Result<()> {
         if !file_path.exists() {
-            writeln!(
-                stdout,
-                "Error: File '{}' does not exist.",
-                file_path.display()
-            )?;
+            interaction_field!("Error: File '{}' does not exist.", file_path.display())?;
             return Ok(());
         }
 
-        writeln!(stdout, "Attempting to open file: {}", file_path.display())?;
+        interaction_field!("Attempting to open file: {}", file_path.display())?;
 
         let desktop_env = env::var("XDG_CURRENT_DESKTOP").unwrap_or_else(|_| String::new());
-        writeln!(stdout, "Detected desktop environment: {}", desktop_env)?;
+        interaction_field!("Detected desktop environment: {}", desktop_env)?;
 
         let opener = match desktop_env.to_lowercase().as_str() {
             "kde" => "kde-open5",
@@ -200,8 +178,7 @@ impl AppState {
                 } else if self.command_exists("gnome-open") {
                     "gnome-open"
                 } else {
-                    writeln!(
-                        stdout,
+                    interaction_field!(
                         "No suitable opener found. Falling back to nix-shell method."
                     )?;
                     return self.nix_shell_open(file_path, stdout);
@@ -209,7 +186,7 @@ impl AppState {
             }
         };
 
-        writeln!(stdout, "Using opener: {}", opener)?;
+        interaction_field!("Using opener: {}", opener)?;
         self.run_command(opener, file_path, stdout)
     }
 
@@ -229,9 +206,9 @@ impl AppState {
         };
 
         if output.status.success() {
-            writeln!(stdout, "File opened successfully.")?;
+            interaction_field!("File opened successfully.")?;
         } else {
-            writeln!(stdout, "Failed to open file. Error output:")?;
+            interaction_field!("Failed to open file. Error output:")?;
             stdout.write_all(&output.stderr)?;
         }
 
@@ -249,9 +226,9 @@ impl AppState {
             .output()?;
 
         if output.status.success() {
-            writeln!(stdout, "File opened successfully using nix-shell.")?;
+            interaction_field!("File opened successfully using nix-shell.")?;
         } else {
-            writeln!(stdout, "Failed to open file using nix-shell. Error output:")?;
+            interaction_field!("Failed to open file using nix-shell. Error output:")?;
             stdout.write_all(&output.stderr)?;
         }
 
@@ -270,11 +247,11 @@ impl AppState {
         let name = match self.prompt_for_name(stdout, "Enter new directory name: ") {
             Ok(Some(name)) => name,
             Ok(None) => {
-                writeln!(stdout, "Directory creation cancelled.")?;
+                interaction_field!("Directory creation cancelled.")?;
                 return Ok(());
             }
             Err(e) => {
-                writeln!(stdout, "Error during name input: {}", e)?;
+                interaction_field!("Error during name input: {}", e)?;
                 return Ok(());
             }
         };
@@ -282,24 +259,21 @@ impl AppState {
         let new_dir_path = self.current_dir.join(&name);
 
         if new_dir_path.exists() {
-            writeln!(stdout, "Error: '{}' already exists.", name)?;
+            interaction_field!("Error: '{}' already exists.", name)?;
             return Ok(());
         }
 
         if !self.check_creation_allowed(&new_dir_path) {
-            writeln!(
-                stdout,
-                "Creation not allowed due to color rules or permissions."
-            )?;
+            interaction_field!("Creation not allowed due to color rules or permissions.")?;
             return Ok(());
         }
 
         match fs::create_dir(&new_dir_path) {
             Ok(_) => {
                 self.add_create_undo_entry(&new_dir_path, true)?;
-                writeln!(stdout, "Directory '{}' created successfully.", name)?;
+                interaction_field!("Directory '{}' created successfully.", name)?;
             }
-            Err(e) => writeln!(stdout, "Failed to create directory: {}", e)?,
+            Err(e) => interaction_field!("Failed to create directory: {}", e)?,
         }
 
         Ok(())
@@ -570,27 +544,6 @@ impl AppState {
         None
     }
 
-    pub fn open_terminal(&mut self, stdout: &mut impl Write) -> io::Result<()> {
-        open_terminal_command(self, stdout)
-    }
-
-    pub fn toggle_selection(&mut self, path: &Path, direction: i32) -> bool {
-        let selected = self
-            .multiple_selected_files
-            .get_or_insert_with(HashSet::new);
-        let was_selected = selected.contains(path);
-
-        if (direction > 0 && !was_selected) || (direction < 0 && was_selected) {
-            if was_selected {
-                selected.remove(path);
-            } else {
-                selected.insert(path.to_path_buf());
-            }
-            true
-        } else {
-            false
-        }
-    }
     pub fn clear_multi_select(&mut self) -> io::Result<()> {
         self.multiple_selected_files = None;
         self.selection_amont = None;
@@ -665,33 +618,6 @@ impl AppState {
         self.multiple_selected_files =
             Some(entries.iter().map(|entry| entry.path.clone()).collect());
     }
-    pub fn is_selected(&self, path: &PathBuf) -> bool {
-        self.multiple_selected_files
-            .as_ref()
-            .map_or(false, |selected| selected.contains(path))
-    }
-    pub fn set_shortcut(
-        &mut self,
-        key: char,
-        path: PathBuf,
-        name: String,
-        index: usize,
-    ) -> io::Result<()> {
-        self.config
-            .shortcuts
-            .get_or_insert_with(HashMap::new)
-            .insert(key, (path, name, index));
-        self.config.save_config()
-    }
-
-    pub fn has_shortcut_for_path(&self, path: &PathBuf) -> Option<char> {
-        self.config.shortcuts.as_ref().and_then(|shortcuts| {
-            shortcuts
-                .iter()
-                .find(|(_, &ref p)| p.0 == *path)
-                .map(|(&k, _)| k)
-        })
-    }
     pub fn get_shortcut(&self, key: char) -> Option<&(PathBuf, String, usize)> {
         self.config
             .shortcuts
@@ -699,44 +625,8 @@ impl AppState {
             .and_then(|shortcuts| shortcuts.get(&key))
     }
 
-    pub fn remove_shortcut(&mut self, key: char) -> io::Result<()> {
-        if let Some(shortcuts) = self.config.shortcuts.as_mut() {
-            shortcuts.remove(&key);
-            if shortcuts.is_empty() {
-                self.config.shortcuts = None;
-            }
-        }
-        self.save_config()
-    }
-
-    pub fn clear_shortcuts(&mut self) -> io::Result<()> {
-        self.config.shortcuts = None;
-        self.save_config()
-    }
-
     pub fn save_config(&self) -> io::Result<()> {
         self.config.save_config()
-    }
-
-    pub fn reload_config(&mut self) -> io::Result<()> {
-        let loaded_config = Config::load_config()?;
-
-        self.config.home_folder = loaded_config.home_folder;
-        self.config.lines_shown = loaded_config.lines_shown;
-        self.config.default_sort = loaded_config.default_sort;
-
-        if let Some(new_shortcuts) = loaded_config.shortcuts {
-            if self.config.shortcuts.is_none() {
-                self.config.shortcuts = Some(new_shortcuts);
-            } else {
-                let existing_shortcuts = self.config.shortcuts.as_mut().unwrap();
-                for (key, path) in new_shortcuts {
-                    existing_shortcuts.entry(key).or_insert(path);
-                }
-            }
-        }
-
-        Ok(())
     }
 
     pub fn set_home_folder(&mut self, path: Option<PathBuf>) -> io::Result<()> {
@@ -747,18 +637,13 @@ impl AppState {
         self.config.save_config()
     }
 
-    pub fn set_current_dir(&mut self, path: PathBuf) -> std::io::Result<()> {
-        self.current_dir = path.clone();
-        self.config.home_folder = Some(path);
-        self.save_config()
-    }
     pub fn start_move(&mut self, current_entry: Option<&FileEntry>) -> Result<(), io::Error> {
         if self.multiple_selected_files.is_some() {
             for path in self.multiple_selected_files.as_ref().unwrap() {
                 if !self.check_operation_allowed(path, "move") {
                     return Err(io::Error::new(
                         io::ErrorKind::PermissionDenied,
-                        format!("Move not allowed for file: {}", path.display()),
+                        format!("Unable to move"),
                     ));
                 }
             }
@@ -766,7 +651,7 @@ impl AppState {
             if !self.check_operation_allowed(&entry.path, "move") {
                 return Err(io::Error::new(
                     io::ErrorKind::PermissionDenied,
-                    format!("Move not allowed for file: {}", entry.path.display()),
+                    format!("Unable to move"),
                 ));
             }
             self.file_to_move = Some(entry.path.clone());

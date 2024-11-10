@@ -300,7 +300,6 @@ pub fn browse_fuzzy_file(app_state: &mut AppState) -> io::Result<BrowseResult> {
                         }
                         Action::Copy => {
                             copy_files(app_state, &entries, selected_index);
-                            stdout.flush()?;
                         }
                         Action::Paste => {
                             paste_files(app_state, &current_dir)?;

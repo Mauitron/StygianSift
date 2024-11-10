@@ -15,6 +15,7 @@
  */
 
 use super::*;
+use std::{fmt, io::Cursor, sync::Mutex};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FileType {
@@ -633,21 +634,6 @@ pub fn clear_preview() -> io::Result<()> {
     Ok(())
 }
 
-fn restore_terminal(stdout: &mut impl Write) -> io::Result<()> {
-    execute!(stdout, terminal::LeaveAlternateScreen, cursor::Show)?;
-    terminal::disable_raw_mode()
-}
-
-fn setup_terminal(stdout: &mut impl Write) -> io::Result<()> {
-    terminal::enable_raw_mode()?;
-    execute!(
-        stdout,
-        terminal::EnterAlternateScreen,
-        terminal::Clear(ClearType::All),
-        cursor::Hide
-    )
-}
-
 pub fn file_type_order(file_type: &FileType) -> u8 {
     match file_type {
         FileType::Directory => 0,
@@ -726,39 +712,12 @@ pub fn write_header(
     queue!(stdout, MoveTo(nav_width / 12 + 1, height / 10 + 1))?;
     writeln!(
         stdout,
-        "Sort: {} | Lines: {}",
+        "Sort: {}",
         sort_order_to_string(sort_order),
         // if show_count { "🟢" } else { "🔴" }, // Not in use, yet.
-        display_lines.to_string().green()
+        // display_lines.to_string().green() // appearently not in use either, I have no idea what i did, too long ago.
     )?;
 
-    Ok(())
-}
-
-fn display_file_info(
-    stdout: &mut impl Write,
-    entry: &FileEntry,
-    start_x: u16,
-    start_y: u16,
-) -> io::Result<()> {
-    queue!(stdout, MoveTo(start_x, start_y))?;
-    write!(
-        stdout,
-        "File: {} | Type: {:?} | Size: {} | Admin: {} | Read-only: {}",
-        truncate_str(&entry.name, 20),
-        entry.file_type,
-        format_size(entry.size),
-        if entry.admin_required {
-            "Yes".red()
-        } else {
-            "No".green()
-        },
-        if entry.read_only {
-            "Yes".red()
-        } else {
-            "No".green()
-        }
-    )?;
     Ok(())
 }
 
@@ -1393,7 +1352,7 @@ pub fn display_shortcuts(app_state: &mut AppState, stdout: &mut impl Write) -> i
                 }
             } else {
                 execute!(stdout, MoveTo(preview_width - 18, 12))?;
-                let _ = interaction_field("No shortcuts set in this layer");
+                let _ = interaction_field!("No shortcuts set in this layer");
             }
         }
 
@@ -1515,7 +1474,9 @@ pub fn clear_interaction_field() -> io::Result<()> {
     stdout.flush()?;
     Ok(())
 }
-pub fn interaction_field(input: &str) -> io::Result<()> {
+pub fn interaction_field(fmt: fmt::Arguments) -> io::Result<()> {
+    let input = fmt.to_string();
+
     let (width, height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 1;
@@ -1523,17 +1484,25 @@ pub fn interaction_field(input: &str) -> io::Result<()> {
 
     queue!(stdout, MoveTo(preview_width + 2, height - 12))?;
     write!(stdout, "{}", "-".repeat((preview_width - 5).into()).green())?;
+
     queue!(stdout, MoveTo(preview_width + 2, height - 11))?;
     write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+
     queue!(
         stdout,
-        MoveTo(preview_width + 2 + input.len() as u16, height - 10)
+        MoveTo(
+            (preview_width * 11 / 8) - (input.len() / 2) as u16,
+            height - 10
+        )
     )?;
     write!(stdout, "{}", input)?;
+
     queue!(stdout, MoveTo(preview_width + 2, height - 9))?;
     write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+
     queue!(stdout, MoveTo(preview_width + 2, height - 8))?;
     write!(stdout, "{}", "-".repeat((preview_width - 5).into()).green())?;
+
     stdout.flush()?;
     Ok(())
 }
