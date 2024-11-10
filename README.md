@@ -64,7 +64,8 @@ decoration - they're a full permission and operation control system:
 
 - Basic shortcuts (0-9) for your most-used directories
 - Shift + numbers for setting new shortcuts
-- Control + numbers for accessing shortcut layers (Coming soon!)
+- F1-F10 for accessing shortcut layers (Up to a 100 unique shortcuts!)
+- Name or rename the shortcut layers for better organization
 - Each shortcut remembers your position in that directory
 - Name your shortcuts for better organization
 - Quick-jump between related directories
@@ -200,6 +201,7 @@ iambic pentameter).
 - Jump to parent directory
 - Jump to top/bottom of list
 - Shortcut system (0-9 keys)
+- Shortcut layers (F1-F10)
 - Directory history tracking
 - Custom directory naming for shortcuts
 - Position memory in directories
