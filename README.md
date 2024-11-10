@@ -278,7 +278,6 @@ iambic pentameter).
 - Keybinding customization
 - Color rule configuration
 - Editor selection
-- Line count adjustment
 - Search depth limits
 - Undo storage limits
 - Shortcut management
