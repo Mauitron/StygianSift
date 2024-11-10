@@ -1275,7 +1275,8 @@ pub fn undo_last_operation(app_state: &mut AppState, stdout: &mut impl Write) ->
 pub fn open_terminal_command(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<()> {
     let current_dir = app_state.current_dir.clone();
 
-    disable_raw_mode()?;
+    // disable_raw_mode()?;
+    let _ = cleanup_terminal();
     execute!(stdout, LeaveAlternateScreen)?;
 
     let shell = env::var("SHELL").unwrap_or_else(|_| {
@@ -1314,7 +1315,7 @@ pub fn open_terminal_command(app_state: &mut AppState, stdout: &mut impl Write) 
     }
     enable_raw_mode()?;
     execute!(stdout, EnterAlternateScreen)?;
-
+    let _ = draw_initial_border(stdout, &app_state.page_state);
     Ok(())
 }
 
