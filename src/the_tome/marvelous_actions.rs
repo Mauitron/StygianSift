@@ -7,7 +7,7 @@
  * https://github.com/Mauitron/StygianSift.git
  *
  * Created by: Maui The Magnificent (Charon)
- * Contact: Maui_The_Magnificent@proton.me 
+ * Contact: Maui_The_Magnificent@proton.me
  *
  * When using, modifying, or distributing this software,
  * please maintain this attribution notice and provide a link
@@ -53,6 +53,19 @@ pub enum Action {
     MoveItem,
     Quit,
     Help,
+    RenameLayer,
+    // Switch shortcut layers
+    SwitchLayer0,
+    SwitchLayer1,
+    SwitchLayer2,
+    SwitchLayer3,
+    SwitchLayer4,
+    SwitchLayer5,
+    SwitchLayer6,
+    SwitchLayer7,
+    SwitchLayer8,
+    SwitchLayer9,
+    // Set shortcuts
     SetShortcut1,
     SetShortcut2,
     SetShortcut3,
@@ -63,6 +76,7 @@ pub enum Action {
     SetShortcut8,
     SetShortcut9,
     SetShortcut0,
+    // Use shortcuts
     UseShortcut1,
     UseShortcut2,
     UseShortcut3,
@@ -81,7 +95,7 @@ pub enum Action {
 
 impl Action {
     pub fn iter() -> Iter<'static, Action> {
-        static ACTIONS: [Action; 59] = [
+        static ACTIONS: [Action; 70] = [
             Action::ToggleFilters,
             Action::GoToTop,
             Action::GoToBottom,
@@ -117,6 +131,19 @@ impl Action {
             Action::MoveItem,
             Action::Quit,
             Action::Help,
+            Action::RenameLayer,
+            // Switch
+            Action::SwitchLayer0,
+            Action::SwitchLayer1,
+            Action::SwitchLayer2,
+            Action::SwitchLayer3,
+            Action::SwitchLayer4,
+            Action::SwitchLayer5,
+            Action::SwitchLayer6,
+            Action::SwitchLayer7,
+            Action::SwitchLayer8,
+            Action::SwitchLayer9,
+            // Set
             Action::SetShortcut1,
             Action::SetShortcut2,
             Action::SetShortcut3,
@@ -127,6 +154,7 @@ impl Action {
             Action::SetShortcut8,
             Action::SetShortcut9,
             Action::SetShortcut0,
+            // Use
             Action::UseShortcut1,
             Action::UseShortcut2,
             Action::UseShortcut3,
@@ -190,6 +218,27 @@ impl FromStr for Action {
             "OpenInEditor" => Ok(Action::OpenInEditor),
             "EditConfig" => Ok(Action::EditConfig),
             "SortCycleForward" => Ok(Action::SortCycleForward),
+            "RenameLayer" => Ok(Action::RenameLayer),
+            s if s.starts_with("SwitchLayer") => {
+                let num = s
+                    .chars()
+                    .last()
+                    .and_then(|c| c.to_digit(10))
+                    .ok_or_else(|| format!("Invalid layer: {}", s))?;
+                match num {
+                    0 => Ok(Action::SwitchLayer0),
+                    1 => Ok(Action::SwitchLayer1),
+                    2 => Ok(Action::SwitchLayer2),
+                    3 => Ok(Action::SwitchLayer3),
+                    4 => Ok(Action::SwitchLayer4),
+                    5 => Ok(Action::SwitchLayer5),
+                    6 => Ok(Action::SwitchLayer6),
+                    7 => Ok(Action::SwitchLayer7),
+                    8 => Ok(Action::SwitchLayer8),
+                    9 => Ok(Action::SwitchLayer9),
+                    _ => Err(format!("Invalid layer number: {}", num)),
+                }
+            }
             s if s.starts_with("SetShortcut") => {
                 let num = s
                     .chars()
@@ -273,6 +322,19 @@ impl Display for Action {
             Action::MoveItem => "MoveItem",
             Action::Quit => "Quit",
             Action::Help => "Help",
+            Action::RenameLayer => "RenameLayer",
+            // switch
+            Action::SwitchLayer0 => "SwitchLayer0",
+            Action::SwitchLayer1 => "SwitchLayer1",
+            Action::SwitchLayer2 => "SwitchLayer2",
+            Action::SwitchLayer3 => "SwitchLayer3",
+            Action::SwitchLayer4 => "SwitchLayer4",
+            Action::SwitchLayer5 => "SwitchLayer5",
+            Action::SwitchLayer6 => "SwitchLayer6",
+            Action::SwitchLayer7 => "SwitchLayer7",
+            Action::SwitchLayer8 => "SwitchLayer8",
+            Action::SwitchLayer9 => "SwitchLayer9",
+            // set
             Action::SetShortcut1 => "SetShortcut1",
             Action::SetShortcut2 => "SetShortcut2",
             Action::SetShortcut3 => "SetShortcut3",
@@ -283,6 +345,7 @@ impl Display for Action {
             Action::SetShortcut8 => "SetShortcut8",
             Action::SetShortcut9 => "SetShortcut9",
             Action::SetShortcut0 => "SetShortcut0",
+            // use
             Action::UseShortcut1 => "UseShortcut1",
             Action::UseShortcut2 => "UseShortcut2",
             Action::UseShortcut3 => "UseShortcut3",

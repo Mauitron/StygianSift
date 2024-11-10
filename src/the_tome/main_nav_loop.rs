@@ -7,7 +7,7 @@
  * https://github.com/Mauitron/StygianSift.git
  *
  * Created by: Maui The Magnificent (Charon)
- * Contact: Maui_The_Magnificent@proton.me 
+ * Contact: Maui_The_Magnificent@proton.me
  *
  * When using, modifying, or distributing this software,
  * please maintain this attribution notice and provide a link
@@ -22,6 +22,8 @@ pub enum BrowseResult {
 }
 
 pub fn browse_fuzzy_file(app_state: &mut AppState) -> io::Result<BrowseResult> {
+    terminal::enable_raw_mode()?;
+
     let mut selected_index = app_state.selected_index;
     let mut current_dir = app_state.current_dir.clone();
     let mut scroll_offset = 0;
@@ -33,7 +35,6 @@ pub fn browse_fuzzy_file(app_state: &mut AppState) -> io::Result<BrowseResult> {
     let mut g_pressed = false;
     let mut preview_active = false;
 
-    terminal::enable_raw_mode()?;
     execute!(stdout, terminal::Clear(ClearType::All))?;
 
     let (width, height) = size()?;
@@ -91,8 +92,13 @@ pub fn browse_fuzzy_file(app_state: &mut AppState) -> io::Result<BrowseResult> {
         last_entries = entries.clone();
 
         if let Ok(Event::Key(key)) = event::read() {
+            // println!(
+            //     "Key code: {:?}, modifiers: {:?}",
+            //     key.code, key.modifiers
+            // );
             if !cfg!(target_os = "windows") || key.kind == KeyEventKind::Press {
                 if let Some(action) = app_state.config.get_action(&key) {
+                    // println!("mapped to action: {:?}", action);
                     match action {
                         Action::ExecuteFile => {
                             if let Some(entry) = entries.get(selected_index as usize) {
@@ -130,6 +136,37 @@ pub fn browse_fuzzy_file(app_state: &mut AppState) -> io::Result<BrowseResult> {
                         Action::ToggleFilters => {
                             handle_search_filter_keys(app_state, key);
                         }
+
+                        Action::RenameLayer => {
+                            handle_layer_actions(
+                                &Action::RenameLayer,
+                                &mut stdout,
+                                preview_width,
+                                height,
+                                app_state,
+                            )?;
+                        }
+                        Action::SwitchLayer1
+                        | Action::SwitchLayer2
+                        | Action::SwitchLayer3
+                        | Action::SwitchLayer4
+                        | Action::SwitchLayer5
+                        | Action::SwitchLayer6
+                        | Action::SwitchLayer7
+                        | Action::SwitchLayer8
+                        | Action::SwitchLayer9
+                        | Action::SwitchLayer0 => {
+                            handle_layer_actions(
+                                &action.clone(),
+                                &mut stdout,
+                                preview_width,
+                                height,
+                                app_state,
+                            )?;
+
+                            app_state.display_current_layer(&mut stdout)?;
+                        }
+
                         #[rustfmt::skip]
                         Action::SetShortcut1 | Action::SetShortcut2 | Action::SetShortcut3 |
                         Action::SetShortcut4 | Action::SetShortcut5 | Action::SetShortcut6 |
@@ -192,7 +229,7 @@ pub fn browse_fuzzy_file(app_state: &mut AppState) -> io::Result<BrowseResult> {
                             continue;
                         }
                         Action::Quit => {
-                            if handle_quit(app_state, &mut stdout, preview_width, height)? {
+                            if handle_quit(app_state, &mut stdout)? {
                                 return Err(io::Error::new(
                                     io::ErrorKind::Interrupted,
                                     "User quit",
@@ -348,6 +385,9 @@ pub fn browse_fuzzy_file(app_state: &mut AppState) -> io::Result<BrowseResult> {
                         }
                         _ => {}
                     }
+                    // } else {
+                    //     println!("action not mapped");
+                    // }
                 }
             }
         }

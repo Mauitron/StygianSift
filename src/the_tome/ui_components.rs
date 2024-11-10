@@ -87,7 +87,7 @@ impl DimmingConfig {
                         b: new_value,
                     }
                 } else {
-                    // For adjusting saturation, moving colors closer to grayscale. play with
+                    // For adjusting saturation, moving colors closer to grayscale. play with it
                     let gray_value =
                         (r as f32 * 0.299 + g as f32 * 0.587 + b as f32 * 0.114) as f32;
 
@@ -212,6 +212,9 @@ pub fn display_help_screen(
     app_state: &AppState,
     full_redraw: bool,
 ) -> io::Result<()> {
+let mut current_page = 1;
+    let total_pages = 2;
+    
     let _ = full_redraw;
     let (width, height) = size()?;
     let nav_width = width / 2;
@@ -242,7 +245,7 @@ pub fn display_help_screen(
             })
             .unwrap_or_else(|| "Unbound".to_string())
     };
-    let sections = [
+    let page1_sections = [
         (
             "Navigation",
             vec![
@@ -275,7 +278,7 @@ pub fn display_help_screen(
         (
             "View and Display",
             vec![
-                (get_key_for_action(&Action::TogglePreview).trim_matches('"').to_string(), "Toggle preview pane"),
+                (get_key_for_action(&Action::TogglePreview).trim_matches('"').to_string(), "Toggle preview pane (Default: [SPACE])"),
                 (get_key_for_action(&Action::ToggleCount).trim_matches('"').to_string(), "Toggle item count display"),
                 (get_key_for_action(&Action::SortCycleForward).trim_matches('"').to_string(), "Change sort order (forward)"),
                 (get_key_for_action(&Action::SetLineAmount).trim_matches('"').to_string(), "Set number of lines in preview"),
@@ -316,70 +319,134 @@ pub fn display_help_screen(
                 (get_key_for_action(&Action::ShowShortcuts).trim_matches('"').to_string(), "Show your stored shortcuts"),
             ],
         ),
-        (
-            "Shortcuts",
-            vec![
-                ("0-9".to_string(), "Use shortcut"),
-                ("Shift + 0-9".to_string(), "Set directory and file shortcut"),
-            ],
-        ),
+    (
+        "Shortcuts",
+        vec![
+            ("0-9".to_string(), "Use shortcut from current layer"),
+            ("Shift + 0-9".to_string(), "Set shortcut in current layer"),
+            ("F1-F10".to_string(), "Quick switch between layers"),
+        ],
+    ),
     ];
+    let page2_sections: [(&str, Vec<(String, &str)>); 8] = [
+            (
+                "Layer Management",
+                vec![
+                    ("F1-F10".to_string(), "Switch to corresponding layer"),
+                    (get_key_for_action(&Action::RenameLayer).trim_matches('"').to_string(), "Rename current layer"),
+                    ("!-) (Shift+0-9)".to_string(), "Set shortcut in current layer"),
+                    ("0-9".to_string(), "Use shortcut from current layer"),
+                    ("F2".to_string(), "Show layer overview and shortcuts"),
+                ],
+            ),
 
-    let mut current_column = 0;
-    let mut current_row = height / 8;
-    let column_width = (width / 2) - 4;
+            (
+        "",
+                vec![(" ".to_string(), "")],
+            ),
+            (
+        "",
+                vec![(" ".to_string(), "")],
+            ),
+            (
+        "",
+                vec![(" ".to_string(), "")],
+            ),
+            (
+        "",
+                vec![(" ".to_string(), "")],
+            ),
+            (
+        "",
+                vec![(" ".to_string(), "")],
+            ),
+            (
+        "",
+                vec![(" ".to_string(), "")],
+            ),
+            (
+        "",
+                vec![(" ".to_string(), "")],
+            ),
+            
+        ];
 
-    for (i, (section_title, commands)) in sections.iter().enumerate() {
-        if i  > 0 && i % 4 == 0  {
-            current_column += column_width;
-            current_row = 6;
-        }
+         loop {
+        let _ = clear_nav();
+        let _ = clear_preview();
 
-        execute!(stdout, MoveTo(current_column + 8, current_row))?;
-        writeln!(stdout, "{}\r", section_title.underlined().bold().green())?;
-        current_row += 1;
+        let title = "File Browser Help Menu\r";
+        let separator = "=".repeat(title.len());
+        execute!(stdout, MoveTo(nav_width / 3, 3))?;
+        writeln!(stdout, "{}\r", title.bold().green())?;
+        execute!(stdout, MoveTo(nav_width / 3, 4))?;
+        writeln!(stdout, "{}\r", separator.green())?;
 
-        for (key, description) in commands {
+        let sections = if current_page == 1 { &page1_sections } else { &page2_sections };
+        let mut current_column = 0;
+        let mut current_row = height / 8;
+        let column_width = (width / 2) - 4;
+
+        for (i, (section_title, commands)) in sections.iter().enumerate() {
+            if i > 0 && i % 4 == 0 {
+                current_column += column_width;
+                current_row = 6;
+            }
+
             execute!(stdout, MoveTo(current_column + 8, current_row))?;
-            writeln!(stdout, "{:<15} - {}\r", key.clone().red(), description.cyan())?;
+            writeln!(stdout, "{}\r", section_title.bold().green())?;
+            current_row += 1;
+
+            for (key, description) in commands {
+                execute!(stdout, MoveTo(current_column + 8, current_row))?;
+                writeln!(stdout, "{:<15}  {}\r", key.clone().red(), description.cyan())?;
+                current_row += 1;
+            }
             current_row += 1;
         }
-        current_row += 1;
-    }
 
-    execute!(stdout, MoveTo((width / 2) + 4, height - 15))?;
-    writeln!(stdout, "{}\r", "Search Depth:".bold().yellow())?;
-    execute!(stdout, MoveTo((width / 2) + 4, height - 14))?;
-    writeln!(stdout, "Current Depth: {}\r", app_state.search_depth_limit.to_string().red())?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 18))?;
+        writeln!(stdout, "{}\r", "Search Depth:".bold().yellow())?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 17))?;
+        writeln!(stdout, "Current Depth: {}\r", app_state.search_depth_limit.to_string().red())?;
 
-    execute!(stdout, MoveTo((width / 2) + 4, height - 12))?;
-    writeln!(stdout, "{}\r", "Undo System Information:".bold().yellow())?;
-    execute!(stdout, MoveTo((width / 2) + 4, height - 11))?;
-    writeln!(stdout, "RAM Limit: {} MB\r", app_state.undo_manager.ram_limit / 1_048_576)?;
-    execute!(stdout, MoveTo((width / 2) + 4, height - 10))?;
-    writeln!(stdout, "Disk Limit: {} GB\r", app_state.undo_manager.disk_limit / 1_073_741_824)?;
-    execute!(stdout, MoveTo((width / 2) + 4, height - 9))?;
-    writeln!(stdout, "Disk Storage Allowed: {}\r",
-        if app_state.undo_manager.allow_disk_storage { "Yes".green().slow_blink() } else { "No".red() }
-    )?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 15))?;
+        writeln!(stdout, "{}\r", "Undo System Information:".bold().yellow())?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 14))?;
+        writeln!(stdout, "RAM Limit: {} MB\r", app_state.undo_manager.ram_limit / 1_048_576)?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 13))?;
+        writeln!(stdout, "Disk Limit: {} GB\r", app_state.undo_manager.disk_limit / 1_073_741_824)?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 12))?;
+        writeln!(stdout, "Disk Storage Allowed: {}\r",
+            if app_state.undo_manager.allow_disk_storage { "Yes".green() } else { "No".red() }
+        )?;
 
-    execute!(stdout, MoveTo((width / 2) + 4, height - 7))?;
-    writeln!(stdout, "{}: {}\r", "Tip: You can remap these keybindings by pressing".italic().blue(), "F3".italic().red())?;
-    execute!(stdout, MoveTo((width / 2) + 4, height - 6))?;
-    writeln!(stdout, "{}\r", "Tip: Experiment with different commands to become more proficient!".italic().blue())?;
-    execute!(stdout, MoveTo((width / 2) + 4, height - 5))?;
-    writeln!(stdout, "Press any key to return to the file browser...\r")?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 10))?;
+        writeln!(stdout, "{}\r", "Navigation:".bold().yellow())?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 9))?;
+        writeln!(stdout, "Page {} of {} (Use → and ← to navigate pages)\r", current_page, total_pages)?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 8))?;
+        writeln!(stdout, "Press ESC to return to the file browser...\r")?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 7))?;
+        writeln!(stdout, "{}: {}\r", "Tip: You can remap these keybindings by pressing".italic().blue(), "F3".italic().red())?;
+        execute!(stdout, MoveTo((width / 2) + 4, height - 6))?;
+        writeln!(stdout, "{}\r", "Tip: Experiment with different commands to become more proficient!".italic().blue())?;
 
-    stdout.flush()?;
+        stdout.flush()?;
 
-    loop {
-        if event::poll(Duration::from_millis(100))? {
-            if let Event::Key(_) = event::read()? {
-                break;
+        if let Event::Key(key) = event::read()? {
+            match key.code {
+                KeyCode::Esc => break,
+                KeyCode::Right | KeyCode::Char('l') if current_page < total_pages => {
+                    current_page += 1;
+                }
+                KeyCode::Left | KeyCode::Char('h') if current_page > 1 => {
+                    current_page -= 1;
+                }
+                _ => {}
             }
         }
     }
-    // let _ = clear_preview();
     Ok(())
 }
 #[rustfmt::skip]
@@ -642,15 +709,15 @@ pub fn write_header(
     queue!(stdout, MoveTo(0, 1))?;
     writeln!(
         stdout,
-        "{} {} for Info | {} {} for shortcuts | {} {} for config | {} {} for color ruleset",
+        "{} {} for Help | {} {} for shortcuts | {} {} for config | {} {} for color ruleset",
         "Press".green(),
-        "F1".red(),
+        "F12".red(),
         "Press".green(),
-        "F2".red(),
+        "F11".red(),
         "Press".green(),
-        "F3".red(),
+        "~".red(),
         "Press".green(),
-        "F4".red()
+        "Shift + F2".red()
     )?;
     let truncated_dir = truncate_path(current_dir, (nav_width / 2) as usize);
     queue!(stdout, MoveTo(nav_width / 12, height / 10))?;
@@ -1020,7 +1087,7 @@ pub fn write_entry(
     write!(
         stdout,
         "{:1} {} {:<width$} {:>10} {} {}",
-        if is_selected { " ->" } else { "  " },
+        if is_selected { " → " } else { "  " },
         icon,
         truncated_name,
         size_str,
@@ -1249,60 +1316,108 @@ pub fn display_folder_preview(
     }
     Ok(())
 }
-// Add shortcut layers for more customization.
-// Maybe ctrl + numbers for layers. allowing for 100 shortcuts
-pub fn display_shortcuts(app_state: &AppState, stdout: &mut impl Write) -> io::Result<()> {
+
+// for consistency i should add in the same highlighting as the rest. do this later
+pub fn display_shortcuts(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<()> {
     let (width, height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;
-    let _ = clear_nav();
-    let _ = clear_preview();
 
-    let title = "Current Shortcuts\r".bold().green();
-    let separator = "=".repeat(title.to_string().len());
-    execute!(stdout, MoveTo(nav_width / 3 + 1, 9))?;
-    writeln!(stdout, "{}\r", title)?;
-    execute!(stdout, MoveTo(nav_width / 3 - 9, 10))?;
-    writeln!(stdout, "{}\r", separator.green())?;
+    loop {
+        let _ = clear_nav();
+        let _ = clear_preview();
 
-    if let Some(shortcuts) = &app_state.config.shortcuts {
-        let sorted_shortcuts: BTreeMap<_, _> = shortcuts.iter().collect();
+        let (layer_index, layer_name) = app_state.config.get_current_layer_info();
+        let title = format!("Shortcuts - {} (Layer {})\r", layer_name, layer_index)
+            .bold()
+            .green();
+        let separator = "=".repeat(title.to_string().len());
 
-        for (i, (key, (path, name, _index))) in sorted_shortcuts.iter().enumerate() {
-            let display_name = if name.is_empty() {
-                path.display().to_string()
-            } else {
-                name.clone()
-            };
-            if path.is_dir() {
-                execute!(stdout, MoveTo(nav_width / 4 - 12, i as u16 + 12))?;
+        execute!(stdout, MoveTo(nav_width / 3 + 1, 7))?;
+        writeln!(stdout, "{}\r", title)?;
+        execute!(stdout, MoveTo(nav_width / 3 - 9, 8))?;
+        writeln!(stdout, "{}\r", separator.green())?;
+
+        execute!(stdout, MoveTo(nav_width / 3 - 9, 10))?;
+        writeln!(stdout, "{}", "Layer Controls:".yellow().bold())?;
+        for i in 0..10 {
+            let layer_name = &app_state.config.shortcut_layers[i].name;
+            execute!(
+                stdout,
+                MoveTo(nav_width / 3 - 7, (11 + i).try_into().unwrap())
+            )?;
+            if i == layer_index {
                 writeln!(
                     stdout,
-                    "{}: {} [{}]\r",
-                    key.green(),
-                    display_name.red(),
-                    path.to_string_lossy().green()
+                    "{}F{}: {} \r",
+                    "→ ".yellow().italic(),
+                    (i + 1).to_string().green(),
+                    layer_name.clone().green().on_dark_grey(),
+                )?;
+            } else {
+                writeln!(
+                    stdout,
+                    "F{}: Switch to {}\r",
+                    (i + 1).to_string().red(),
+                    layer_name.clone().green()
                 )?;
             }
         }
-    } else {
-        execute!(stdout, MoveTo(nav_width / 3 + 2, 12))?;
-        writeln!(stdout, "{}", "No shortcuts set.\r".red().bold())?;
+
+        execute!(stdout, MoveTo(preview_width * 11 / 8, 10))?;
+        writeln!(stdout, "{}", "Current Layer Shortcuts:".yellow().bold())?;
+
+        if let Some(layer) = app_state.config.shortcut_layers.get(layer_index) {
+            if let Some(shortcuts) = &layer.shortcuts {
+                let sorted_shortcuts: BTreeMap<_, _> = shortcuts.iter().collect();
+                for (i, (key, (path, name, _))) in sorted_shortcuts.iter().enumerate() {
+                    let display_name = if name.is_empty() {
+                        path.display().to_string()
+                    } else {
+                        name.clone()
+                    };
+
+                    execute!(stdout, MoveTo(preview_width * 11 / 10, 12 + i as u16))?;
+                    // execute!(stdout, MoveTo(preview_width - 18, 12 + i as u16))?;
+                    if path.is_dir() {
+                        writeln!(
+                            stdout,
+                            "{}: {} [{}]\r",
+                            key.green(),
+                            display_name.red(),
+                            path.to_string_lossy().green()
+                        )?;
+                    } else {
+                        writeln!(stdout, "{}: {}\r", key.green(), display_name.blue())?;
+                    }
+                }
+            } else {
+                execute!(stdout, MoveTo(preview_width - 18, 12))?;
+                let _ = interaction_field("No shortcuts set in this layer");
+            }
+        }
+
+        execute!(stdout, SetForegroundColor(Color::Green))?;
+        queue!(stdout, MoveTo(nav_width / 5, height - 11))?;
+        writeln!(stdout, "Use F1-F10 to switch layers")?;
+        queue!(stdout, MoveTo(nav_width / 5, height - 10))?;
+        writeln!(stdout, "Press ESC to return to browser\r")?;
+
+        stdout.flush()?;
+
+        if let Event::Key(key) = event::read()? {
+            match key.code {
+                KeyCode::Esc => break,
+                KeyCode::F(n) if n >= 1 && n <= 10 => {
+                    let layer_index = (n - 1) as usize;
+                    app_state.config.switch_layer(layer_index)?;
+                }
+                _ => {}
+            }
+        }
     }
-
-    execute!(stdout, SetForegroundColor(Color::Green))?;
-    queue!(stdout, MoveTo(preview_width + 23, height - 9))?;
-    writeln!(stdout, "\nPress any key to return to the browser.\r")?;
-
-    execute!(stdout, MoveTo(nav_width / 3 - 20, 10))?;
-
-    writeln!(
-        stdout,
-        "                                                   "
-    )?;
-    stdout.flush()?;
-    event::read()?;
-
+    let _ = clear_nav();
+    let _ = clear_preview();
     Ok(())
 }
 // Does not work correctly. Pull crashes the program.
@@ -1379,5 +1494,46 @@ pub fn display_git_info(
         writeln!(stdout, "{}", status)?;
     }
 
+    Ok(())
+}
+pub fn clear_interaction_field() -> io::Result<()> {
+    let (width, height) = size()?;
+    let nav_width = width / 2;
+    let preview_width = width - nav_width - 1;
+    let mut stdout = stdout();
+
+    queue!(stdout, MoveTo(preview_width + 2, height - 12))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 11))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 10))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 9))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 8))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+    stdout.flush()?;
+    Ok(())
+}
+pub fn interaction_field(input: &str) -> io::Result<()> {
+    let (width, height) = size()?;
+    let nav_width = width / 2;
+    let preview_width = width - nav_width - 1;
+    let mut stdout = stdout();
+
+    queue!(stdout, MoveTo(preview_width + 2, height - 12))?;
+    write!(stdout, "{}", "-".repeat((preview_width - 5).into()).green())?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 11))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+    queue!(
+        stdout,
+        MoveTo(preview_width + 2 + input.len() as u16, height - 10)
+    )?;
+    write!(stdout, "{}", input)?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 9))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 8))?;
+    write!(stdout, "{}", "-".repeat((preview_width - 5).into()).green())?;
+    stdout.flush()?;
     Ok(())
 }

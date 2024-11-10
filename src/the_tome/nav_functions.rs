@@ -53,8 +53,98 @@ pub fn handle_multi_select(
         *scroll_offset = scroll_offset.saturating_sub(1);
     }
 }
+pub fn handle_layer_switch(
+    app_state: &mut AppState,
+    layer_index: usize,
+    stdout: &mut impl Write,
+    preview_width: u16,
+    height: u16,
+) -> io::Result<()> {
+    let layer_name = app_state.config.shortcut_layers[layer_index].name.clone();
+    app_state.config.current_layer = layer_index;
 
-// Look into adding more shortcuts. they are very useful
+    queue!(stdout, MoveTo(preview_width + 3, height - 12))?;
+    write!(
+        stdout,
+        "{}",
+        "-".green().to_string().repeat((preview_width - 4).into())
+    )?;
+
+    queue!(stdout, MoveTo(preview_width + 28, height - 10))?;
+    writeln!(stdout, "Switched to shortcut layer: {}", layer_name.green())?;
+
+    queue!(stdout, MoveTo(preview_width + 3, height - 8))?;
+    write!(
+        stdout,
+        "{}",
+        "-".green().to_string().repeat((preview_width - 4).into())
+    )?;
+    let _ = clear_interaction_field();
+    app_state.config.save_config()?;
+    Ok(())
+}
+
+pub fn handle_layer_rename(
+    app_state: &mut AppState,
+    stdout: &mut impl Write,
+    preview_width: u16,
+    height: u16,
+) -> io::Result<()> {
+    let current_layer = app_state.config.current_layer;
+
+    queue!(stdout, MoveTo(preview_width + 3, height - 12))?;
+    write!(
+        stdout,
+        "{}",
+        "-".green().to_string().repeat((preview_width - 4).into())
+    )?;
+
+    queue!(stdout, MoveTo(preview_width + 23, height - 10))?;
+    writeln!(stdout, "Enter new name for current layer:")?;
+
+    queue!(stdout, MoveTo(preview_width + 3, height - 8))?;
+    write!(
+        stdout,
+        "{}",
+        "-".green().to_string().repeat((preview_width - 4).into())
+    )?;
+
+    stdout.flush()?;
+
+    queue!(stdout, MoveTo(preview_width + 37, height - 9))?;
+    let new_name = read_line()?;
+    if !new_name.trim().is_empty() {
+        app_state
+            .config
+            .rename_layer(current_layer, new_name.trim().to_string())?;
+        app_state.config.save_config()?;
+    }
+    let _ = clear_interaction_field();
+    Ok(())
+}
+
+pub fn handle_layer_actions(
+    action: &Action,
+    stdout: &mut impl Write,
+    preview_width: u16,
+    height: u16,
+    app_state: &mut AppState,
+) -> io::Result<()> {
+    match action {
+        Action::SwitchLayer0 => handle_layer_switch(app_state, 0, stdout, preview_width, height),
+        Action::SwitchLayer1 => handle_layer_switch(app_state, 1, stdout, preview_width, height),
+        Action::SwitchLayer2 => handle_layer_switch(app_state, 2, stdout, preview_width, height),
+        Action::SwitchLayer3 => handle_layer_switch(app_state, 3, stdout, preview_width, height),
+        Action::SwitchLayer4 => handle_layer_switch(app_state, 4, stdout, preview_width, height),
+        Action::SwitchLayer5 => handle_layer_switch(app_state, 5, stdout, preview_width, height),
+        Action::SwitchLayer6 => handle_layer_switch(app_state, 6, stdout, preview_width, height),
+        Action::SwitchLayer7 => handle_layer_switch(app_state, 7, stdout, preview_width, height),
+        Action::SwitchLayer8 => handle_layer_switch(app_state, 8, stdout, preview_width, height),
+        Action::SwitchLayer9 => handle_layer_switch(app_state, 9, stdout, preview_width, height),
+        Action::RenameLayer => handle_layer_rename(app_state, stdout, preview_width, height),
+        _ => Ok(()),
+    }
+}
 pub fn handle_set_shortcut(
     app_state: &mut AppState,
     stdout: &mut impl Write,
@@ -77,6 +167,7 @@ pub fn handle_set_shortcut(
         Action::SetShortcut0 => '0',
         _ => unreachable!(),
     };
+
     queue!(stdout, MoveTo(preview_width + 3, height - 12))?;
     write!(
         stdout,
@@ -96,31 +187,29 @@ pub fn handle_set_shortcut(
     queue!(stdout, SetForegroundColor(Color::Red))?;
     let shortcut_name = read_line()?.red();
     queue!(stdout, SetForegroundColor(Color::Reset))?;
-    if app_state.config.shortcuts.is_none() {
-        app_state.config.shortcuts = Some(std::collections::HashMap::new());
-    }
-    if let Some(shortcuts) = &mut app_state.config.shortcuts {
-        shortcuts.insert(
-            shortcut_key,
-            (
-                current_dir.clone(),
-                shortcut_name.to_string(),
-                selected_index,
-            ),
-        );
-        app_state.config.save_config()?;
-        queue!(stdout, MoveTo(preview_width + 3, height - 10))?;
-        writeln!(
-            stdout,
-            "'{}' set to current directory: {}",
-            shortcut_key.red(),
-            current_dir.to_string_lossy().green(),
-            // selected_index
-        )?;
-    }
+
+    let current_layer = app_state.config.current_layer;
+    app_state.config.set_shortcut_in_layer(
+        current_layer,
+        shortcut_key,
+        current_dir.clone(),
+        shortcut_name.to_string(),
+        selected_index,
+    )?;
+    app_state.config.save_config()?;
+
+    let layer_name = &app_state.config.shortcut_layers[current_layer].name;
+    queue!(stdout, MoveTo(preview_width + 3, height - 10))?;
+    writeln!(
+        stdout,
+        "'{}' set to current directory in layer '{}': {}",
+        shortcut_key.red(),
+        layer_name.clone().green(),
+        current_dir.to_string_lossy().green(),
+    )?;
+
     Ok(())
 }
-
 pub fn handle_use_shortcut(
     app_state: &mut AppState,
     current_dir: &mut PathBuf,
@@ -147,68 +236,84 @@ pub fn handle_use_shortcut(
         Action::UseShortcut0 => '0',
         _ => unreachable!(),
     };
-    if let Some(shortcuts) = &app_state.config.shortcuts {
-        if let Some((path, _, index)) = shortcuts.get(&c) {
-            if path.is_dir() {
-                *current_dir = path.clone();
-                app_state.current_dir = current_dir.clone();
-                *selected_index = *index;
-                *scroll_offset = 0;
-                let _ = clear_nav();
-            } else if let Some(parent) = path.parent() {
-                *current_dir = parent.to_path_buf();
-                app_state.current_dir = current_dir.clone();
-                let entries = get_sorted_entries(&app_state, &current_dir, sort_order)?;
-                *selected_index = entries
-                    .iter()
-                    .position(|e| e.path == *path)
-                    .map(|i| i)
-                    .unwrap_or(0);
-                *scroll_offset = 0;
-            } else {
-                // writeln!(stdout, "                              ",)?;
-                queue!(stdout, MoveTo(preview_width + 30, height - 10))?;
-                writeln!(stdout, "{}", "Error: Invalid shortcut path".red())?;
-            }
+
+    let current_layer = app_state.config.current_layer;
+    if let Some((path, _, index)) = app_state.config.get_shortcut_from_layer(current_layer, c) {
+        if path.is_dir() {
+            *current_dir = path.clone();
+            app_state.current_dir = current_dir.clone();
+            *selected_index = *index;
+            *scroll_offset = 0;
+            let _ = clear_nav();
+        } else if let Some(parent) = path.parent() {
+            *current_dir = parent.to_path_buf();
+            app_state.current_dir = current_dir.clone();
+            let entries = get_sorted_entries(&app_state, &current_dir, sort_order)?;
+            *selected_index = entries.iter().position(|e| e.path == *path).unwrap_or(0);
+            *scroll_offset = 0;
         } else {
             queue!(stdout, MoveTo(preview_width + 30, height - 10))?;
-            writeln!(stdout, "{}", "Error: Shortcut not found".red())?;
+            writeln!(stdout, "{}", "Error: Invalid shortcut path".red())?;
         }
+    } else {
+        queue!(stdout, MoveTo(preview_width + 30, height - 10))?;
+        writeln!(
+            stdout,
+            "{}",
+            format!(
+                "No shortcut '{}' in layer '{}'",
+                c, app_state.config.shortcut_layers[current_layer].name
+            )
+            .red()
+        )?;
     }
     Ok(())
 }
-
-pub fn handle_quit(
-    app_state: &mut AppState,
-    stdout: &mut impl Write,
-    preview_width: u16,
-    height: u16,
-) -> io::Result<bool> {
-    let _ = preview_width;
-    let (width, _) = size()?;
-    let nav_width = width / 2;
-    let preview_width = width - nav_width - 2;
+pub fn handle_quit(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<bool> {
     if app_state.multiple_selected_files.iter().count() > 0 {
         app_state.clear_multi_select()?;
         return Ok(false);
     }
+
     if app_state.is_moving {
+        let (width, height) = size()?;
+        let nav_width = width / 2;
+        let preview_width = width - nav_width - 2;
         app_state.cancel_move();
-        // execute!(stdout, MoveTo(4, 3))?;
         queue!(stdout, MoveTo(preview_width + 28, height - 12))?;
         writeln!(stdout, "File move cancelled.")?;
         Ok(false)
     } else {
-        
-        queue!(stdout, MoveTo(preview_width + 27, height - 10))?;
-        write!(stdout, "{}", "Are you sure you want to quit?".green())?;
-        queue!(stdout, MoveTo(preview_width + 40, height - 9))?;
-        write!(stdout, "{}/{}", "Y".red(), "N".red())?;
-        queue!(stdout, MoveTo(preview_width + 40, height - 8))?;
-        let quit = read_line().expect("error, not a valid command");
-        let quit_options = vec!["y", "Y", "yes", "Yes", "YES"];
-        cleanup_terminal()?;
-        Ok(quit_options.contains(&quit.as_str()))
+        let (width, height) = size()?;
+        let nav_width = width / 2;
+        let preview_width = width - nav_width - 2;
+        queue!(stdout, MoveTo(preview_width + 3, height - 12))?;
+        write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
+        queue!(stdout, MoveTo((preview_width * 11) / 8, height - 10),)?;
+        write!(stdout, "Press {} you want to quit", "Y".red())?;
+        queue!(stdout, MoveTo(preview_width + 3, height - 8))?;
+        write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
+
+        stdout.flush()?;
+
+        let mut buffer = [0; 1];
+        io::stdin().read_exact(&mut buffer)?;
+        let input = buffer[0] as char;
+
+        match input.to_ascii_lowercase() {
+            'y' => {
+                cleanup_terminal()?;
+                Ok(true)
+            }
+            _ => {
+                let (width, _height) = size()?;
+                let nav_width = width / 2;
+                let _preview_width = width - nav_width - 2;
+                let _ = clear_interaction_field();
+                stdout.flush()?;
+                Ok(false)
+            }
+        }
     }
 }
 

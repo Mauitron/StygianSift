@@ -7,7 +7,7 @@
  * https://github.com/Mauitron/StygianSift.git
  *
  * Created by: Maui The Magnificent (Charon)
- * Contact: Maui_The_Magnificent@proton.me 
+ * Contact: Maui_The_Magnificent@proton.me
  *
  * When using, modifying, or distributing this software,
  * please maintain this attribution notice and provide a link
@@ -15,198 +15,6 @@
  */
 
 use super::*;
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ColorRule {
-    pub allow_delete: bool,
-    pub allow_rename: bool,
-    pub allow_move: bool,
-    pub allow_copy: bool,
-    pub include_in_search: bool,
-}
-
-impl Default for ColorRule {
-    fn default() -> Self {
-        ColorRule {
-            allow_delete: true,
-            allow_rename: true,
-            allow_move: true,
-            allow_copy: true,
-            include_in_search: true,
-        }
-    }
-}
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum MarkerColor {
-    Red,
-    Orange,
-    Yellow,
-    Green,
-    Blue,
-    Cyan,
-    Pink,
-    White,
-    Magenta,
-    Reset,
-}
-
-impl MarkerColor {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            MarkerColor::Red => "red",
-            MarkerColor::Orange => "orange",
-            MarkerColor::Yellow => "yellow",
-            MarkerColor::Green => "green",
-            MarkerColor::Blue => "blue",
-            MarkerColor::Cyan => "cyan",
-            MarkerColor::Pink => "pink",
-            MarkerColor::White => "white",
-            MarkerColor::Magenta => "magenta",
-            MarkerColor::Reset => "reset",
-        }
-    }
-
-    fn from_str(s: &str) -> Option<Self> {
-        match s {
-            "red" => Some(MarkerColor::Red),
-            "orange" => Some(MarkerColor::Orange),
-            "yellow" => Some(MarkerColor::Yellow),
-            "green" => Some(MarkerColor::Green),
-            "blue" => Some(MarkerColor::Blue),
-            "cyan" => Some(MarkerColor::Cyan),
-            "pink" => Some(MarkerColor::Pink),
-            "white" => Some(MarkerColor::White),
-            "magenta" => Some(MarkerColor::Magenta),
-            "reset" => Some(MarkerColor::Reset),
-            _ => None,
-        }
-    }
-
-    pub fn to_highlight_color(&self) -> Color {
-        match self {
-            MarkerColor::Red => Color::Rgb { r: 255, g: 0, b: 0 },
-            MarkerColor::Orange => Color::Rgb {
-                r: 220,
-                g: 125,
-                b: 0,
-            },
-            MarkerColor::Yellow => Color::Rgb {
-                r: 255,
-                g: 255,
-                b: 0,
-            },
-            MarkerColor::Green => Color::Rgb { r: 0, g: 250, b: 0 },
-            MarkerColor::Blue => Color::Rgb {
-                r: 0,
-                g: 100,
-                b: 255,
-            },
-            MarkerColor::Cyan => Color::Rgb {
-                r: 0,
-                g: 255,
-                b: 255,
-            },
-            MarkerColor::Pink => Color::Rgb {
-                r: 214,
-                g: 134,
-                b: 148,
-            },
-            MarkerColor::White => Color::Rgb {
-                r: 255,
-                g: 255,
-                b: 255,
-            },
-            MarkerColor::Magenta => Color::Rgb {
-                r: 255,
-                g: 0,
-                b: 255,
-            },
-            MarkerColor::Reset => Color::Rgb {
-                r: 180,
-                g: 180,
-                b: 180,
-            },
-        }
-    }
-    pub fn color_order(color: Option<MarkerColor>) -> u8 {
-        match color {
-            None => 0,
-            Some(color) => match color {
-                MarkerColor::Red => 1,
-                MarkerColor::Orange => 2,
-                MarkerColor::Yellow => 3,
-                MarkerColor::Green => 4,
-                MarkerColor::Blue => 5,
-                MarkerColor::Cyan => 6,
-                MarkerColor::Pink => 7,
-                MarkerColor::White => 8,
-                MarkerColor::Magenta => 9,
-                MarkerColor::Reset => 10,
-            },
-        }
-    }
-    pub fn next(&self) -> Self {
-        match self {
-            MarkerColor::Red => MarkerColor::Orange,
-            MarkerColor::Orange => MarkerColor::Yellow,
-            MarkerColor::Yellow => MarkerColor::Green,
-            MarkerColor::Green => MarkerColor::Blue,
-            MarkerColor::Blue => MarkerColor::Cyan,
-            MarkerColor::Cyan => MarkerColor::Pink,
-            MarkerColor::Pink => MarkerColor::White,
-            MarkerColor::White => MarkerColor::Magenta,
-            MarkerColor::Magenta => MarkerColor::Reset,
-            MarkerColor::Reset => MarkerColor::Red,
-        }
-    }
-
-    pub fn to_color(&self) -> Color {
-        match self {
-            MarkerColor::Red => Color::Rgb { r: 255, g: 0, b: 0 },
-            MarkerColor::Green => Color::Rgb { r: 0, g: 250, b: 0 },
-            MarkerColor::Blue => Color::Rgb {
-                r: 0,
-                g: 100,
-                b: 255,
-            },
-            MarkerColor::Yellow => Color::Rgb {
-                r: 255,
-                g: 255,
-                b: 0,
-            },
-            MarkerColor::Magenta => Color::Rgb {
-                r: 255,
-                g: 0,
-                b: 255,
-            },
-            MarkerColor::Cyan => Color::Rgb {
-                r: 0,
-                g: 255,
-                b: 255,
-            },
-            MarkerColor::White => Color::Rgb {
-                r: 255,
-                g: 255,
-                b: 255,
-            },
-            MarkerColor::Orange => Color::Rgb {
-                r: 220,
-                g: 125,
-                b: 0,
-            },
-            MarkerColor::Pink => Color::Rgb {
-                r: 214,
-                g: 134,
-                b: 148,
-            },
-            MarkerColor::Reset => Color::Rgb {
-                r: 180,
-                g: 180,
-                b: 180,
-            },
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct Config {
     pub home_folder: Option<PathBuf>,
@@ -221,6 +29,8 @@ pub struct Config {
     pub search_depth_limit: usize,
     pub colored_items: HashMap<MarkerColor, HashSet<PathBuf>>,
     pub color_rules: HashMap<MarkerColor, ColorRule>,
+    pub shortcut_layers: Vec<ShortcutLayer>,
+    pub current_layer: usize,
 }
 
 impl Config {
@@ -238,11 +48,15 @@ impl Config {
             search_depth_limit: 3,
             colored_items: HashMap::new(),
             color_rules: HashMap::new(),
+            shortcut_layers: (0..10)
+                .map(|i| ShortcutLayer::new(format!("Layer {}", i)))
+                .collect(),
+            current_layer: 0,
         }
     }
     //////////////////////////////////////////////////KeyBindings//////////////////////////////////////////////////////////////////////
 #[rustfmt::skip]
-    pub fn default_keybindings() -> HashMap<KeyEvent, Action> {
+pub fn default_keybindings() -> HashMap<KeyEvent, Action> {
     let mut keybindings = HashMap::new();
 
     //------------------------------------------------Navigation---------------------------------------------------------------------\\
@@ -282,10 +96,9 @@ impl Config {
     keybindings.insert(KeyEvent::new(KeyCode::Char('L'), KeyModifiers::SHIFT), Action::SetLineAmount);
     keybindings.insert(KeyEvent::new(KeyCode::Char('C'), KeyModifiers::SHIFT), Action::CycleItemColor);
     keybindings.insert(KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL), Action::RemoveItemColor);
-    keybindings.insert(KeyEvent::new(KeyCode::F(4), KeyModifiers::NONE), Action::SetColorRules);
 
     //---------------------------------------------Search and Sort-------------------------------------------------------------------\\
-    keybindings.insert(KeyEvent::new(KeyCode::Char('S'), KeyModifiers::SHIFT), Action::Search); //Unused as of now
+    keybindings.insert(KeyEvent::new(KeyCode::Char('S'), KeyModifiers::SHIFT), Action::Search);
     keybindings.insert(KeyEvent::new(KeyCode::Char('F'), KeyModifiers::SHIFT), Action::SearchFiles);
     keybindings.insert(KeyEvent::new(KeyCode::Char('c'), KeyModifiers::NONE), Action::ToggleCount);
     keybindings.insert(KeyEvent::new(KeyCode::Char('s'), KeyModifiers::NONE), Action::SortCycleForward);
@@ -299,14 +112,28 @@ impl Config {
     keybindings.insert(KeyEvent::new(KeyCode::Char('.'), KeyModifiers::NONE), Action::OpenInEditor);
 
     //-----------------------------------------Help and Configuration----------------------------------------------------------------\\
-    keybindings.insert(KeyEvent::new(KeyCode::F(1), KeyModifiers::NONE), Action::Help);
-    keybindings.insert(KeyEvent::new(KeyCode::F(2), KeyModifiers::NONE), Action::ShowShortcuts);
-    keybindings.insert(KeyEvent::new(KeyCode::F(3), KeyModifiers::NONE), Action::EditConfig);
+    keybindings.insert(KeyEvent::new(KeyCode::F(12), KeyModifiers::NONE), Action::Help);
+    keybindings.insert(KeyEvent::new(KeyCode::F(11), KeyModifiers::NONE), Action::ShowShortcuts);
+    keybindings.insert(KeyEvent::new(KeyCode::F(1),  KeyModifiers::SHIFT),Action::RenameLayer);
+    keybindings.insert(KeyEvent::new(KeyCode::F(2), KeyModifiers::SHIFT), Action::SetColorRules);
+    keybindings.insert(KeyEvent::new(KeyCode::Char('~'),KeyModifiers::NONE), Action::EditConfig);
 
     //-------------------------------------------------Shortcuts---------------------------------------------------------------------\\
+    
+    //                                          <|Choose Shortcut Layer|>
+    keybindings.insert(KeyEvent::new(KeyCode::F(1), KeyModifiers::NONE),Action::SwitchLayer1);
+    keybindings.insert(KeyEvent::new(KeyCode::F(2), KeyModifiers::NONE),Action::SwitchLayer2);
+    keybindings.insert(KeyEvent::new(KeyCode::F(3), KeyModifiers::NONE),Action::SwitchLayer3);
+    keybindings.insert(KeyEvent::new(KeyCode::F(4), KeyModifiers::NONE),Action::SwitchLayer4);
+    keybindings.insert(KeyEvent::new(KeyCode::F(5), KeyModifiers::NONE),Action::SwitchLayer5);
+    keybindings.insert(KeyEvent::new(KeyCode::F(6), KeyModifiers::NONE),Action::SwitchLayer6);
+    keybindings.insert(KeyEvent::new(KeyCode::F(7), KeyModifiers::NONE),Action::SwitchLayer7);
+    keybindings.insert(KeyEvent::new(KeyCode::F(8), KeyModifiers::NONE),Action::SwitchLayer8);
+    keybindings.insert(KeyEvent::new(KeyCode::F(9), KeyModifiers::NONE),Action::SwitchLayer9);
+    keybindings.insert(KeyEvent::new(KeyCode::F(10), KeyModifiers::NONE),Action::SwitchLayer0);
+
 
     //                                             <|Set Shortcuts|>
-
     keybindings.insert(KeyEvent::new(KeyCode::Char('!'), KeyModifiers::NONE), Action::SetShortcut1);
     keybindings.insert(KeyEvent::new(KeyCode::Char('@'), KeyModifiers::NONE), Action::SetShortcut2);
     keybindings.insert(KeyEvent::new(KeyCode::Char('#'), KeyModifiers::NONE), Action::SetShortcut3);
@@ -319,7 +146,6 @@ impl Config {
     keybindings.insert(KeyEvent::new(KeyCode::Char(')'), KeyModifiers::NONE), Action::SetShortcut0);
 
     //                                             <|Use Shortcuts|>
-
     keybindings.insert(KeyEvent::new(KeyCode::Char('1'), KeyModifiers::NONE), Action::UseShortcut1);
     keybindings.insert(KeyEvent::new(KeyCode::Char('2'), KeyModifiers::NONE), Action::UseShortcut2);
     keybindings.insert(KeyEvent::new(KeyCode::Char('3'), KeyModifiers::NONE), Action::UseShortcut3);
@@ -336,21 +162,6 @@ impl Config {
 
     keybindings
 }
-
-    pub fn get_selected_path(app_state: &AppState, entries: &[FileEntry]) -> Option<PathBuf> {
-        entries
-            .get(app_state.current_file_selected as usize)
-            .map(|entry| entry.path.clone())
-    }
-
-    pub fn get_action(&self, key: &KeyEvent) -> Option<&Action> {
-        self.keybindings.as_ref().and_then(|kb| {
-            kb.iter()
-                .find(|(k, _)| Self::compare_key_events(k, key))
-                .map(|(_, v)| v)
-        })
-    }
-
     fn compare_key_events(a: &KeyEvent, b: &KeyEvent) -> bool {
         a.code == b.code && a.modifiers == b.modifiers
     }
@@ -375,7 +186,85 @@ impl Config {
     }
 
     /////////////////////////////////////////////////!KeyBindings!/////////////////////////////////////////////////////////////////////
+     pub fn get_current_layer_info(&self) -> (usize, &str) {
+        (
+            self.current_layer,
+            &self.shortcut_layers[self.current_layer].name
+        )
+    }
 
+    pub fn switch_layer(&mut self, index: usize) -> io::Result<()> {
+        // Ensure the layer exists
+        while self.shortcut_layers.len() <= index {
+            let new_layer_name = format!("Layer {}", self.shortcut_layers.len());
+            self.shortcut_layers.push(ShortcutLayer::new(new_layer_name));
+        }
+
+        self.current_layer = index;
+        self.save_config()
+    }
+    
+       pub fn set_shortcut_in_layer(
+        &mut self,
+        layer_index: usize,
+        key: char,
+        path: PathBuf,
+        name: String,
+        index: usize,
+    ) -> io::Result<()> {
+        if layer_index < self.shortcut_layers.len() {
+            let layer = &mut self.shortcut_layers[layer_index];
+            layer.shortcuts.get_or_insert_with(HashMap::new)
+                .insert(key, (path, name, index));
+            Ok(())
+        } else {
+            Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Invalid layer index",
+            ))
+        }
+    }
+
+    pub fn get_shortcut_from_layer(
+        &self,
+        layer_index: usize,
+        key: char,
+    ) -> Option<&(PathBuf, String, usize)> {
+        self.shortcut_layers.get(layer_index)
+            .and_then(|layer| layer.shortcuts.as_ref())
+            .and_then(|shortcuts| shortcuts.get(&key))
+    }
+
+
+    pub fn add_new_layer(&mut self, name: String) -> usize {
+        self.shortcut_layers.push(ShortcutLayer::new(name));
+        self.shortcut_layers.len() - 1
+    }
+
+    pub fn rename_layer(&mut self, layer_index: usize, new_name: String) -> io::Result<()> {
+        if layer_index < self.shortcut_layers.len() {
+            self.shortcut_layers[layer_index].name = new_name;
+            Ok(())
+        } else {
+            Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Invalid: Layer Doesn't Exist",
+            ))
+        }
+    }
+    pub fn get_selected_path(app_state: &AppState, entries: &[FileEntry]) -> Option<PathBuf> {
+        entries
+            .get(app_state.current_file_selected as usize)
+            .map(|entry| entry.path.clone())
+    }
+
+    pub fn get_action(&self, key: &KeyEvent) -> Option<&Action> {
+        self.keybindings.as_ref().and_then(|kb| {
+            kb.iter()
+                .find(|(k, _)| Self::compare_key_events(k, key))
+                .map(|(_, v)| v)
+        })
+    }
     pub fn set_home_folder(&mut self, path: Option<PathBuf>) {
         self.home_folder = path;
     }
@@ -455,14 +344,34 @@ impl Config {
                 writeln!(file, "  {} = {}|{}|{}", key, path.display(), name, index)?;
             }
         }
+            writeln!(file, "shortcut_layers:")?;
+            for (i, layer) in self.shortcut_layers.iter().enumerate() {
+                writeln!(file, "  layer_{}_name = {}", i, layer.name)?;
+
+            if let Some(shortcuts) = &layer.shortcuts {
+                for (key, (path, name, index)) in shortcuts {
+                    writeln!(
+                        file,
+                        "  layer_{}_shortcut_{} = {}|{}|{}",
+                        i,
+                        key,
+                        path.display(),
+                        name,
+                        index
+                    )?;
+                }
+            }
+        }
+        writeln!(file, "current_layer = {}", self.current_layer)?;
 
         Ok(())
     }
+        
     pub fn load_config() -> io::Result<Self> {
+        let mut config = Config::new();
         let config_path = Self::get_config_path()?;
         let content = fs::read_to_string(config_path)?;
 
-        let mut config = Config::new();
         let mut current_section: Option<&str> = None;
         let mut current_color: Option<MarkerColor> = None;
 
@@ -471,12 +380,15 @@ impl Config {
             if trimmed_line.is_empty() {
                 continue;
             }
-
             if trimmed_line == "keybindings:" {
                 current_section = Some("keybindings");
                 continue;
             } else if trimmed_line == "colored_items:" {
                 current_section = Some("colored_items");
+                continue;
+            }
+            if trimmed_line == "shortcut_layers:" {
+                current_section = Some("shortcut_layers");
                 continue;
             }
             if trimmed_line == "shortcuts:" {
@@ -488,6 +400,53 @@ impl Config {
             }
 
             match current_section {
+                Some("shortcut_layers") => {
+                    if trimmed_line.starts_with("layer_") {
+                        if let Some((key, value)) = trimmed_line.split_once('=') {
+                            let key = key.trim();
+                            let value = value.trim();
+
+                            if key.ends_with("_name") {
+                                let layer_index = key
+                                    .strip_prefix("layer_")
+                                    .and_then(|s| s.strip_suffix("_name"))
+                                    .and_then(|s| s.parse::<usize>().ok());
+
+                                if let Some(index) = layer_index {
+                                    while config.shortcut_layers.len() <= index {
+                                        config.add_new_layer("New Layer".to_string());
+                                    }
+                                    config.shortcut_layers[index].name = value.to_string();
+                                }
+                            } else if key.contains("_shortcut_") {
+                                let parts: Vec<&str> = key.split('_').collect();
+                                if parts.len() >= 4 {
+                                    if let (Ok(layer_index), Some(shortcut_key)) =
+                                        (parts[1].parse::<usize>(), parts[3].chars().next())
+                                    {
+                                        let parts: Vec<&str> = value.splitn(3, '|').collect();
+                                        if parts.len() == 3 {
+                                            let path = PathBuf::from(parts[0].trim());
+                                            let name = parts[1].trim().to_string();
+                                            let index = parts[2].trim().parse().unwrap_or(0);
+                                            let _ = config.set_shortcut_in_layer(
+                                                layer_index,
+                                                shortcut_key,
+                                                path,
+                                                name,
+                                                index,
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if trimmed_line.starts_with("current_layer = ") {
+                        if let Some(value) = trimmed_line.strip_prefix("current_layer = ") {
+                            config.current_layer = value.parse().unwrap_or(0);
+                        }
+                    }
+                }
                 Some("shortcuts") => {
                     if let Some((key, value)) = trimmed_line.split_once('=') {
                         let key = key.trim().chars().next().unwrap();
@@ -820,6 +779,9 @@ fn read_keybinding_to_remove(
     }
 }
 ////////////////////////////////////////////////////////////////Shortcuts///////////////////////////////////////////////////////////////////////////////
+
+
+
 pub fn manage_shortcuts(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<()> {
     let (width, height) = size()?;
     let nav_width = width / 2;
@@ -964,6 +926,214 @@ pub fn read_shortcut_to_remove(stdout: &mut impl Write) -> io::Result<char> {
             if let KeyCode::Esc = key_event.code {
                 break Ok('e');
             }
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ShortcutLayer {
+    pub name: String,
+    pub shortcuts: Option<HashMap<char, (PathBuf, String, usize)>>,
+}
+
+impl ShortcutLayer {
+    pub fn new(name: String) -> Self {
+        ShortcutLayer {
+            name,
+            shortcuts: None,
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////Colors///////////////////////////////////////////////////////////////////////////////
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ColorRule {
+    pub allow_delete: bool,
+    pub allow_rename: bool,
+    pub allow_move: bool,
+    pub allow_copy: bool,
+    pub include_in_search: bool,
+}
+
+impl Default for ColorRule {
+    fn default() -> Self {
+        ColorRule {
+            allow_delete: true,
+            allow_rename: true,
+            allow_move: true,
+            allow_copy: true,
+            include_in_search: true,
+        }
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum MarkerColor {
+    Red,
+    Orange,
+    Yellow,
+    Green,
+    Blue,
+    Cyan,
+    Pink,
+    White,
+    Magenta,
+    Reset,
+}
+
+impl MarkerColor {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            MarkerColor::Red => "red",
+            MarkerColor::Orange => "orange",
+            MarkerColor::Yellow => "yellow",
+            MarkerColor::Green => "green",
+            MarkerColor::Blue => "blue",
+            MarkerColor::Cyan => "cyan",
+            MarkerColor::Pink => "pink",
+            MarkerColor::White => "white",
+            MarkerColor::Magenta => "magenta",
+            MarkerColor::Reset => "reset",
+        }
+    }
+
+    fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "red" => Some(MarkerColor::Red),
+            "orange" => Some(MarkerColor::Orange),
+            "yellow" => Some(MarkerColor::Yellow),
+            "green" => Some(MarkerColor::Green),
+            "blue" => Some(MarkerColor::Blue),
+            "cyan" => Some(MarkerColor::Cyan),
+            "pink" => Some(MarkerColor::Pink),
+            "white" => Some(MarkerColor::White),
+            "magenta" => Some(MarkerColor::Magenta),
+            "reset" => Some(MarkerColor::Reset),
+            _ => None,
+        }
+    }
+
+    pub fn to_highlight_color(&self) -> Color {
+        match self {
+            MarkerColor::Red => Color::Rgb { r: 255, g: 0, b: 0 },
+            MarkerColor::Orange => Color::Rgb {
+                r: 220,
+                g: 125,
+                b: 0,
+            },
+            MarkerColor::Yellow => Color::Rgb {
+                r: 255,
+                g: 255,
+                b: 0,
+            },
+            MarkerColor::Green => Color::Rgb { r: 0, g: 250, b: 0 },
+            MarkerColor::Blue => Color::Rgb {
+                r: 0,
+                g: 100,
+                b: 255,
+            },
+            MarkerColor::Cyan => Color::Rgb {
+                r: 0,
+                g: 255,
+                b: 255,
+            },
+            MarkerColor::Pink => Color::Rgb {
+                r: 214,
+                g: 134,
+                b: 148,
+            },
+            MarkerColor::White => Color::Rgb {
+                r: 255,
+                g: 255,
+                b: 255,
+            },
+            MarkerColor::Magenta => Color::Rgb {
+                r: 255,
+                g: 0,
+                b: 255,
+            },
+            MarkerColor::Reset => Color::Rgb {
+                r: 180,
+                g: 180,
+                b: 180,
+            },
+        }
+    }
+    pub fn color_order(color: Option<MarkerColor>) -> u8 {
+        match color {
+            None => 0,
+            Some(color) => match color {
+                MarkerColor::Red => 1,
+                MarkerColor::Orange => 2,
+                MarkerColor::Yellow => 3,
+                MarkerColor::Green => 4,
+                MarkerColor::Blue => 5,
+                MarkerColor::Cyan => 6,
+                MarkerColor::Pink => 7,
+                MarkerColor::White => 8,
+                MarkerColor::Magenta => 9,
+                MarkerColor::Reset => 10,
+            },
+        }
+    }
+    pub fn next(&self) -> Self {
+        match self {
+            MarkerColor::Red => MarkerColor::Orange,
+            MarkerColor::Orange => MarkerColor::Yellow,
+            MarkerColor::Yellow => MarkerColor::Green,
+            MarkerColor::Green => MarkerColor::Blue,
+            MarkerColor::Blue => MarkerColor::Cyan,
+            MarkerColor::Cyan => MarkerColor::Pink,
+            MarkerColor::Pink => MarkerColor::White,
+            MarkerColor::White => MarkerColor::Magenta,
+            MarkerColor::Magenta => MarkerColor::Reset,
+            MarkerColor::Reset => MarkerColor::Red,
+        }
+    }
+
+    pub fn to_color(&self) -> Color {
+        match self {
+            MarkerColor::Red => Color::Rgb { r: 255, g: 0, b: 0 },
+            MarkerColor::Green => Color::Rgb { r: 0, g: 250, b: 0 },
+            MarkerColor::Blue => Color::Rgb {
+                r: 0,
+                g: 100,
+                b: 255,
+            },
+            MarkerColor::Yellow => Color::Rgb {
+                r: 255,
+                g: 255,
+                b: 0,
+            },
+            MarkerColor::Magenta => Color::Rgb {
+                r: 255,
+                g: 0,
+                b: 255,
+            },
+            MarkerColor::Cyan => Color::Rgb {
+                r: 0,
+                g: 255,
+                b: 255,
+            },
+            MarkerColor::White => Color::Rgb {
+                r: 255,
+                g: 255,
+                b: 255,
+            },
+            MarkerColor::Orange => Color::Rgb {
+                r: 220,
+                g: 125,
+                b: 0,
+            },
+            MarkerColor::Pink => Color::Rgb {
+                r: 214,
+                g: 134,
+                b: 148,
+            },
+            MarkerColor::Reset => Color::Rgb {
+                r: 180,
+                g: 180,
+                b: 180,
+            },
         }
     }
 }

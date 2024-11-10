@@ -7,7 +7,7 @@
  * https://github.com/Mauitron/StygianSift.git
  *
  * Created by: Maui The Magnificent (Charon)
- * Contact: Maui_The_Magnificent@proton.me 
+ * Contact: Maui_The_Magnificent@proton.me
  *
  * When using, modifying, or distributing this software,
  * please maintain this attribution notice and provide a link

@@ -7,7 +7,7 @@
  * https://github.com/Mauitron/StygianSift.git
  *
  * Created by: Maui The Magnificent (Charon)
- * Contact: Maui_The_Magnificent@proton.me 
+ * Contact: Maui_The_Magnificent@proton.me
  *
  * When using, modifying, or distributing this software,
  * please maintain this attribution notice and provide a link
@@ -15,7 +15,6 @@
  */
 
 #[allow(dead_code)]
-// mod hydra;
 use crossterm::{
     event::{Event, KeyCode},
     terminal,
@@ -31,6 +30,9 @@ use the_tome::tome_state::AppState;
 //global extantions rules
 //plugin system
 //color rules that persist outside of the app?
+//add option for simple, more utilitarian UI
+//add scrolling to preview
+//consolidate similar functions.
 
 fn main() -> io::Result<()> {
     let mut state = AppState::new()?;
@@ -61,7 +63,7 @@ fn main() -> io::Result<()> {
                     _ => {}
                 }
             }
-            terminal::disable_raw_mode()?;
+            // terminal::disable_raw_mode()?;
 
             // redraw_interface(&mut stdout, &mut state)?;
         }
@@ -71,6 +73,7 @@ fn main() -> io::Result<()> {
 }
 // Part of my search algorithm. might be added later, or will be another project?
 
+// crossterm::execute!(io::stdout(), terminal::Clear(terminal::ClearType::All))?;
 // fn redraw_interface(stdout: &mut Stdout, state: &mut AppState) -> io::Result<()> {
 //     let current_count = if state.show_count { 0 } else { 0 };
 

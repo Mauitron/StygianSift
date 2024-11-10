@@ -7,7 +7,7 @@
  * https://github.com/Mauitron/StygianSift.git
  *
  * Created by: Maui The Magnificent (Charon)
- * Contact: Maui_The_Magnificent@proton.me 
+ * Contact: Maui_The_Magnificent@proton.me
  *
  * When using, modifying, or distributing this software,
  * please maintain this attribution notice and provide a link
@@ -139,6 +139,39 @@ impl AppState {
             changing_color: false,
             search_filters: SearchFilters::new(),
         })
+    }
+
+    pub fn display_current_layer(&self, stdout: &mut impl Write) -> io::Result<()> {
+        let (width, height) = size()?;
+        let nav_width = width / 2;
+        let preview_width = width - nav_width - 2;
+
+        let (layer_index, layer_name) = self.config.get_current_layer_info();
+
+        queue!(stdout, MoveTo(preview_width + 3, height - 12))?;
+        write!(
+            stdout,
+            "{}",
+            "-".green().to_string().repeat((preview_width - 4).into())
+        )?;
+
+        queue!(stdout, MoveTo(preview_width + 28, height - 10))?;
+        writeln!(
+            stdout,
+            "Current Layer: {} ({})",
+            layer_index,
+            layer_name.green()
+        )?;
+
+        queue!(stdout, MoveTo(preview_width + 3, height - 8))?;
+        write!(
+            stdout,
+            "{}",
+            "-".green().to_string().repeat((preview_width - 4).into())
+        )?;
+
+        stdout.flush()?;
+        Ok(())
     }
     pub fn execute_file(&self, stdout: &mut impl Write, file_path: &Path) -> io::Result<()> {
         if !file_path.exists() {
