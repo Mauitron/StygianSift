@@ -1,5 +1,7 @@
-# StygianSift: Navigate the Digital Styx
-![image](https://github.com/user-attachments/assets/ffbc17f2-7f52-4f32-bd49-4d439b5dd0b6)
+<div align="center">
+  <img src="./StygianSift_logo.svg" width="1200" alt="StygianSift Logo">
+</div>
+
 ### If you like StygianSift or want to see more from me, please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
 
 ## Features and Capabilities
