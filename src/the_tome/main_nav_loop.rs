@@ -236,6 +236,9 @@ pub fn browse_fuzzy_file(app_state: &mut AppState) -> io::Result<BrowseResult> {
                                 ));
                             }
                         }
+                        Action::CastCommandLineSpell => {
+                            let _ = execute_terminal_command(app_state, &mut stdout);
+                        }
                         Action::GiveBirthFile => {
                             let _ = app_state.create_file(&mut stdout);
                         }

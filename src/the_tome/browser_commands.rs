@@ -908,6 +908,7 @@ pub fn parse_key_event(s: &str) -> KeyEvent {
         "Enter" => KeyCode::Enter,
         "Esc" => KeyCode::Esc,
         "F1" => KeyCode::F(1),
+        // KeyCode::Char(' ') => "[SPACE]".to_string(),
         " " => KeyCode::Char(' '),
         c if c.len() == 1 => KeyCode::Char(c.chars().next().unwrap()),
         _ => KeyCode::Null,
@@ -944,6 +945,7 @@ pub fn key_event_to_string(key: &KeyEvent) -> String {
         KeyCode::Delete => "Delete".to_string(),
         KeyCode::Insert => "Insert".to_string(),
         KeyCode::Esc => "Esc".to_string(),
+        KeyCode::Char(' ') => "[SPACE]".to_string(),
         KeyCode::Char(c) => c.to_string(),
         KeyCode::F(n) => format!("F{}", n),
         _ => format!("{:?}", key.code),
@@ -1272,11 +1274,486 @@ pub fn undo_last_operation(app_state: &mut AppState, stdout: &mut impl Write) ->
     }
 }
 
-pub fn open_terminal_command(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<()> {
-    let current_dir = app_state.current_dir.clone();
+pub fn execute_terminal_command(
+    app_state: &mut AppState,
+    stdout: &mut impl Write,
+) -> io::Result<()> {
+    let (width, height) = size()?;
+    let nav_width = width / 2;
+    let preview_width = width - nav_width - 2;
+    let start_y = 5;
+    let max_lines = height - 15;
+    let mut terminal_output: VecDeque<(String, bool)> = VecDeque::new();
+    let mut autocomplete = Autocomplete::new();
+    let dimming_config = DimmingConfig::new(5); // visible suggestions. maybe more is better?
+                                                // let _ = clear_preview();
+    let _ = clear_interaction_field();
+    queue!(stdout, MoveTo(preview_width + 3, height - 13))?;
+    write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
+    queue!(stdout, MoveTo(preview_width + 3, height - 7))?;
+    write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
 
-    // disable_raw_mode()?;
-    let _ = cleanup_terminal();
+    execute!(stdout, cursor::Show)?;
+
+    queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
+    write!(stdout, "> ")?;
+    stdout.flush()?;
+
+    fn display_suggestions(
+        stdout: &mut impl Write,
+        suggestions: &[String],
+        current_index: usize,
+        nav_width: u16,
+        height: u16,
+        dimming_config: &DimmingConfig,
+        command_buffer: &str,
+    ) -> io::Result<()> {
+        let max_suggestions = 5;
+        let suggestion_x = nav_width + 2;
+        let suggestion_y = height - 10;
+
+        for i in 0..max_suggestions {
+            queue!(stdout, MoveTo(suggestion_x, suggestion_y + i as u16 - 2))?;
+            write!(stdout, "{}", " ".repeat(40))?;
+        }
+
+        queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
+        execute!(stdout, SetForegroundColor(Color::Green))?;
+        write!(stdout, ">")?;
+
+        for (i, c) in command_buffer.chars().enumerate() {
+            let color = if i % 2 == 0 {
+                Color::Rgb {
+                    r: 200,
+                    g: 100,
+                    b: 200,
+                }
+            } else {
+                Color::Rgb {
+                    r: 150,
+                    g: 250,
+                    b: 150,
+                }
+            };
+            execute!(stdout, SetForegroundColor(color))?;
+            write!(stdout, "{}", c)?;
+        }
+        // need to make the cursor more visible at the start
+        queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
+        execute!(stdout, SetForegroundColor(Color::Green))?;
+        write!(stdout, ">")?;
+        execute!(
+            stdout,
+            SetForegroundColor(Color::Rgb {
+                r: 255,
+                g: 255,
+                b: 255
+            })
+        )?;
+        write!(stdout, " {}", command_buffer)?;
+
+        if suggestions.len() == 1 {
+            let suggestion = &suggestions[0];
+            let words: Vec<&str> = command_buffer.split_whitespace().collect();
+            if let Some(last_word) = words.last() {
+                let completion = if suggestion.starts_with(last_word) {
+                    &suggestion[last_word.len()..]
+                } else {
+                    suggestion
+                };
+
+                queue!(
+                    stdout,
+                    MoveTo(nav_width + 4 + command_buffer.len() as u16 + 2, height - 10),
+                    SetForegroundColor(Color::DarkGrey)
+                )?;
+                write!(stdout, "{}", completion)?;
+            }
+            return Ok(());
+        }
+
+        let get_color = |distance: i32| -> Color {
+            match distance.abs() {
+                0 => Color::Rgb {
+                    r: 150,
+                    g: 255,
+                    b: 150,
+                },
+                1 => Color::Rgb {
+                    r: 100,
+                    g: 150,
+                    b: 100,
+                },
+                2 => Color::Rgb {
+                    r: 70,
+                    g: 100,
+                    b: 70,
+                },
+                _ => Color::Rgb {
+                    r: 50,
+                    g: 70,
+                    b: 50,
+                },
+            }
+        };
+
+        for (i, suggestion) in suggestions
+            .iter()
+            .skip(current_index.saturating_sub(2))
+            .take(max_suggestions)
+            .enumerate()
+        {
+            let relative_pos = i as i32 - 2;
+            let color = get_color(relative_pos);
+
+            queue!(stdout, MoveTo(suggestion_x, suggestion_y + i as u16 - 2))?;
+
+            if i == 2 && current_index >= 2 {
+                execute!(stdout, SetForegroundColor(color))?;
+                write!(stdout, "→ {}\r", suggestion.clone().dark_green())?;
+                write!(stdout, "{}", " ".repeat(suggestion.len() / 35))?;
+            } else {
+                execute!(stdout, SetForegroundColor(color))?;
+                write!(stdout, "  {}\r", suggestion)?;
+            }
+        }
+
+        execute!(stdout, SetForegroundColor(Color::Reset))?;
+        stdout.flush()?;
+        Ok(())
+    }
+
+    fn handle_command(
+        command: &str,
+        app_state: &mut AppState,
+        terminal_output: &mut VecDeque<(String, bool)>,
+        stdout: &mut impl Write,
+    ) -> io::Result<()> {
+        let parts: Vec<&str> = command.split_whitespace().collect();
+
+        if parts.is_empty() {
+            return Ok(());
+        }
+
+        match parts[0] {
+            "cd" => {
+                let new_dir = if parts.len() < 2 {
+                    return Ok(());
+                } else if parts[1] == ".." {
+                    if let Some(parent) = app_state.current_dir.parent() {
+                        parent.to_path_buf()
+                    } else {
+                        app_state.current_dir.clone()
+                    }
+                } else {
+                    let path = PathBuf::from(parts[1]);
+                    if path.is_absolute() {
+                        path
+                    } else {
+                        app_state.current_dir.join(path)
+                    }
+                };
+
+                match fs::canonicalize(&new_dir) {
+                    Ok(canonical_path) => {
+                        app_state.last_browsed_dir = app_state.current_dir.clone();
+                        app_state.current_dir = canonical_path;
+                        app_state.selected_index = 0;
+                        app_state.scroll_state.offset = 0;
+
+                        if let Ok(entries) = fs::read_dir(&app_state.current_dir) {
+                            let entries: Vec<FileEntry> = entries
+                                .filter_map(|entry| entry.ok())
+                                .filter_map(|entry| FileEntry::new(entry.path()).ok())
+                                .collect();
+
+                            display_directory(
+                                app_state,
+                                &entries,
+                                &app_state.current_dir.clone(),
+                                app_state.selected_index,
+                                stdout,
+                                app_state.scroll_state.offset,
+                                app_state.lines,
+                                true,
+                            )?;
+                        }
+                    }
+                    Err(e) => {
+                        terminal_output.push_back((format!("cd: {}: {}", parts[1], e), true));
+                    }
+                }
+            }
+            _ => {
+                match Command::new(parts[0])
+                    .args(&parts[1..])
+                    .current_dir(&app_state.current_dir)
+                    .output()
+                {
+                    Ok(output) => {
+                        if !output.stdout.is_empty() {
+                            String::from_utf8_lossy(&output.stdout)
+                                .lines()
+                                .for_each(|line| {
+                                    terminal_output.push_back((line.to_string(), false));
+                                });
+                        }
+                        if !output.stderr.is_empty() {
+                            String::from_utf8_lossy(&output.stderr)
+                                .lines()
+                                .for_each(|line| {
+                                    terminal_output.push_back((line.to_string(), true));
+                                });
+                        }
+
+                        if let Ok(entries) = fs::read_dir(&app_state.current_dir) {
+                            let entries: Vec<FileEntry> = entries
+                                .filter_map(|entry| entry.ok())
+                                .filter_map(|entry| FileEntry::new(entry.path()).ok())
+                                .collect();
+
+                            display_directory(
+                                app_state,
+                                &entries,
+                                &app_state.current_dir.clone(),
+                                app_state.selected_index,
+                                stdout,
+                                app_state.scroll_state.offset,
+                                app_state.lines,
+                                true,
+                            )?;
+                        }
+                    }
+                    Err(e) => {
+                        terminal_output.push_back((format!("Error: {}", e), true));
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+    queue!(stdout, MoveTo(preview_width + 3, height - 13))?;
+    write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
+    queue!(stdout, MoveTo(preview_width + 3, height - 7))?;
+    write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
+    let mut command_buffer = String::new();
+    let mut last_tab_word = String::new();
+    let mut tab_count = 0;
+    while let Ok(Event::Key(key)) = event::read() {
+        match key.code {
+            KeyCode::Esc => {
+                execute!(stdout, cursor::Hide)?;
+                let _ = clear_interaction_field();
+
+                if let Ok(entries) = fs::read_dir(&app_state.current_dir) {
+                    let entries: Vec<FileEntry> = entries
+                        .filter_map(|entry| entry.ok())
+                        .filter_map(|entry| FileEntry::new(entry.path()).ok())
+                        .collect();
+
+                    display_directory(
+                        app_state,
+                        &entries,
+                        &app_state.current_dir.clone(),
+                        app_state.selected_index,
+                        stdout,
+                        app_state.scroll_state.offset,
+                        app_state.lines,
+                        true,
+                    )?;
+                }
+                return Ok(());
+            }
+            KeyCode::Tab => {
+                if autocomplete.suggestions.is_empty() {
+                    autocomplete.get_suggestions(&command_buffer, &app_state.current_dir)?;
+                }
+
+                if !autocomplete.suggestions.is_empty() {
+                    let words: Vec<&str> = command_buffer.split_whitespace().collect();
+                    let current_word = words.last().map_or("", |w| *w);
+
+                    if tab_count == 0 || last_tab_word != current_word {
+                        last_tab_word = current_word.to_string();
+                        tab_count = 0;
+                    }
+
+                    autocomplete.next_suggestion();
+                    tab_count += 1;
+
+                    if let Some(suggestion) = autocomplete.get_current_suggestion() {
+                        if let Some(last_word) = words.last() {
+                            let prefix = command_buffer[..command_buffer.len() - last_word.len()]
+                                .to_string();
+                            command_buffer = format!("{}{}", prefix, suggestion);
+                        } else {
+                            command_buffer = suggestion.clone();
+                        }
+
+                        queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
+                        write!(stdout, "> {}", command_buffer)?;
+                    }
+
+                    display_suggestions(
+                        stdout,
+                        &autocomplete.suggestions,
+                        autocomplete.current_index,
+                        nav_width,
+                        height,
+                        &dimming_config,
+                        &command_buffer,
+                    )?;
+                }
+            }
+            KeyCode::Char(c) => {
+                command_buffer.push(c);
+                tab_count = 0;
+
+                queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
+                execute!(stdout, SetForegroundColor(Color::Green))?;
+                write!(stdout, ">")?;
+                execute!(
+                    stdout,
+                    SetForegroundColor(Color::Rgb {
+                        r: 200,
+                        g: 255,
+                        b: 200
+                    })
+                )?;
+                write!(stdout, " {}", command_buffer)?;
+
+                autocomplete.get_suggestions(&command_buffer, &app_state.current_dir)?;
+                display_suggestions(
+                    stdout,
+                    &autocomplete.suggestions,
+                    autocomplete.current_index,
+                    nav_width,
+                    height,
+                    &dimming_config,
+                    &command_buffer,
+                )?;
+            }
+            KeyCode::Backspace => {
+                if !command_buffer.is_empty() {
+                    command_buffer.pop();
+                    tab_count = 0;
+
+                    queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
+                    write!(stdout, "{}", " ".repeat(40))?;
+
+                    queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
+                    execute!(stdout, SetForegroundColor(Color::Green))?;
+                    write!(stdout, ">")?;
+                    execute!(
+                        stdout,
+                        SetForegroundColor(Color::Rgb {
+                            r: 200,
+                            g: 255,
+                            b: 200
+                        })
+                    )?;
+                    write!(stdout, " {}", command_buffer)?;
+
+                    autocomplete.get_suggestions(&command_buffer, &app_state.current_dir)?;
+                    display_suggestions(
+                        stdout,
+                        &autocomplete.suggestions,
+                        autocomplete.current_index,
+                        nav_width,
+                        height,
+                        &dimming_config,
+                        &command_buffer,
+                    )?;
+                }
+            }
+            KeyCode::Down => {
+                autocomplete.next_suggestion();
+                display_suggestions(
+                    stdout,
+                    &autocomplete.suggestions,
+                    autocomplete.current_index,
+                    nav_width,
+                    height,
+                    &dimming_config,
+                    &command_buffer,
+                )?;
+            }
+            KeyCode::Up => {
+                autocomplete.prev_suggestion();
+                display_suggestions(
+                    stdout,
+                    &autocomplete.suggestions,
+                    autocomplete.current_index,
+                    nav_width,
+                    height,
+                    &dimming_config,
+                    &command_buffer,
+                )?;
+            }
+            KeyCode::Enter => {
+                let command = if autocomplete.showing_suggestions
+                    && !autocomplete.suggestions.is_empty()
+                {
+                    if let Some(suggestion) = autocomplete.get_current_suggestion() {
+                        let words: Vec<&str> = command_buffer.split_whitespace().collect();
+                        if let Some(last_word) = words.last() {
+                            let prefix = command_buffer[..command_buffer.len() - last_word.len()]
+                                .to_string();
+                            format!("{}{}", prefix, suggestion)
+                        } else {
+                            suggestion.clone()
+                        }
+                    } else {
+                        command_buffer.trim().to_string()
+                    }
+                } else {
+                    command_buffer.trim().to_string()
+                };
+
+                while terminal_output.len() > 1000 {
+                    terminal_output.pop_front();
+                }
+
+                handle_command(&command, app_state, &mut terminal_output, stdout)?;
+                let _ = clear_preview();
+                queue!(stdout, MoveTo(nav_width + 4, (height - 14) as u16))?;
+                terminal_output.push_back((format!("> {}", command.clone().red()), false));
+                for (i, (line, is_error)) in terminal_output
+                    .iter()
+                    .rev()
+                    .take((max_lines - 2) as usize)
+                    .enumerate()
+                {
+                    queue!(stdout, MoveTo(nav_width + 4, (height - 15) - (i) as u16))?;
+                    if *is_error {
+                        execute!(stdout, SetForegroundColor(Color::Red))?;
+                        write!(stdout, "{}\r", line)?;
+                        execute!(stdout, SetForegroundColor(Color::Reset))?;
+                    } else {
+                        write!(stdout, "{}\r", line.clone().green())?;
+                    }
+                }
+
+                command_buffer.clear();
+                queue!(stdout, MoveTo(preview_width + 3, height - 13))?;
+                write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
+                queue!(stdout, MoveTo(preview_width + 3, height - 7))?;
+                write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
+                queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
+                write!(stdout, "{}", "> ")?;
+                autocomplete.showing_suggestions = false;
+            }
+            _ => {}
+        }
+        stdout.flush()?;
+    }
+
+    Ok(())
+}
+pub fn open_terminal_command(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<()> {
+    let original_dir = env::current_dir()?;
+
+    cleanup_terminal()?;
     execute!(stdout, LeaveAlternateScreen)?;
 
     let shell = env::var("SHELL").unwrap_or_else(|_| {
@@ -1289,33 +1766,47 @@ pub fn open_terminal_command(app_state: &mut AppState, stdout: &mut impl Write) 
 
     println!("Entering shell mode. Use your shell's exit command to return to StygianSift.");
 
-    let _status = if cfg!(target_os = "windows") {
+    let status = if cfg!(target_os = "windows") {
         Command::new("cmd")
             .arg("/C")
-            .arg(&shell)
-            .current_dir(&app_state.current_dir)
+            .arg(format!(
+                "cd {} && {}",
+                app_state.current_dir.display(),
+                &shell
+            ))
             .stdin(Stdio::inherit())
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .status()?
     } else {
         Command::new(&shell)
-            .current_dir(&app_state.current_dir)
+            // .arg("-c")
+            .arg(format!(
+                "cd {} && exec {}",
+                app_state.current_dir.display(),
+                &shell
+            ))
             .stdin(Stdio::inherit())
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit())
             .status()?
     };
 
+    if !status.success() {
+        eprintln!("Shell exited with error status");
+    }
+
     if let Ok(new_dir) = env::current_dir() {
         update_navigation_stack(app_state, new_dir.clone());
         app_state.current_dir = new_dir;
-    } else {
-        app_state.current_dir = current_dir;
     }
+
+    env::set_current_dir(&original_dir)?;
+
     enable_raw_mode()?;
     execute!(stdout, EnterAlternateScreen)?;
-    let _ = draw_initial_border(stdout, &app_state.page_state);
+    draw_initial_border(stdout, &app_state.page_state)?;
+
     Ok(())
 }
 
@@ -1761,4 +2252,89 @@ fn edit_color_rule(
 
     app_state.set_color_rule(color, rule);
     Ok(())
+}
+struct Autocomplete {
+    suggestions: Vec<String>,
+    current_index: usize,
+    last_word: String,
+    showing_suggestions: bool,
+}
+impl Autocomplete {
+    fn new() -> Self {
+        Self {
+            suggestions: Vec::new(),
+            current_index: 0,
+            last_word: String::new(),
+            showing_suggestions: false,
+        }
+    }
+
+    fn get_suggestions(&mut self, input: &str, current_dir: &Path) -> io::Result<()> {
+        self.suggestions.clear();
+        let words: Vec<&str> = input.split_whitespace().collect();
+        let current_word = words.last().unwrap_or(&"").to_lowercase();
+        self.last_word = current_word.clone();
+
+        if words.len() <= 1 {
+            let builtin_commands = ["cd", "ls", "mkdir", "touch", "rm", "cp", "mv"];
+            for cmd in builtin_commands.iter() {
+                if cmd.starts_with(&current_word) {
+                    self.suggestions.push((*cmd).to_string());
+                }
+            }
+
+            if let Ok(path) = std::env::var("PATH") {
+                for path_entry in path.split(':') {
+                    if let Ok(entries) = fs::read_dir(path_entry) {
+                        for entry in entries.filter_map(Result::ok) {
+                            if let Ok(file_name) = entry.file_name().into_string() {
+                                if file_name.to_lowercase().starts_with(&current_word) {
+                                    self.suggestions.push(file_name);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if let Ok(entries) = fs::read_dir(current_dir) {
+                for entry in entries.filter_map(Result::ok) {
+                    if let Ok(file_name) = entry.file_name().into_string() {
+                        if file_name.to_lowercase().starts_with(&current_word) {
+                            let mut suggestion = file_name;
+                            if entry.file_type()?.is_dir() {
+                                suggestion.push('/');
+                            }
+                            self.suggestions.push(suggestion);
+                        }
+                    }
+                }
+            }
+        }
+
+        self.suggestions.sort();
+        self.suggestions.dedup();
+        self.current_index = 0;
+        self.showing_suggestions = !self.suggestions.is_empty();
+        Ok(())
+    }
+
+    fn get_current_suggestion(&self) -> Option<&String> {
+        self.suggestions.get(self.current_index)
+    }
+
+    fn next_suggestion(&mut self) {
+        if !self.suggestions.is_empty() {
+            self.current_index = (self.current_index + 1) % self.suggestions.len();
+        }
+    }
+
+    fn prev_suggestion(&mut self) {
+        if !self.suggestions.is_empty() {
+            self.current_index = self
+                .current_index
+                .checked_sub(1)
+                .unwrap_or(self.suggestions.len() - 1);
+        }
+    }
 }

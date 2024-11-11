@@ -279,7 +279,7 @@ let mut current_page = 1;
         (
             "View and Display",
             vec![
-                (get_key_for_action(&Action::TogglePreview).trim_matches('"').to_string(), "Toggle preview pane (Default: [SPACE])"),
+                (get_key_for_action(&Action::TogglePreview).trim_matches('"').to_string(), "Toggle preview pane"),
                 (get_key_for_action(&Action::ToggleCount).trim_matches('"').to_string(), "Toggle item count display"),
                 (get_key_for_action(&Action::SortCycleForward).trim_matches('"').to_string(), "Change sort order (forward)"),
                 (get_key_for_action(&Action::SetLineAmount).trim_matches('"').to_string(), "Set number of lines in preview"),
@@ -307,7 +307,8 @@ let mut current_page = 1;
         (
             "System and Tools",
             vec![
-                (get_key_for_action(&Action::TerminalCommand).trim_matches('"').to_string(), "Open terminal in current folder"),
+                (get_key_for_action(&Action::TerminalCommand).trim_matches('"').to_string(), "Open terminal"),
+                (get_key_for_action(&Action::CastCommandLineSpell).trim_matches('"').to_string(), "Open terminal within in StygianSift"),
                 (get_key_for_action(&Action::GitMenu).trim_matches('"').to_string(), "Open Git menu"),
                 (get_key_for_action(&Action::Undo).trim_matches('"').to_string(), "Undo last operation"),
             ],

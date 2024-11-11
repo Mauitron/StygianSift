@@ -157,8 +157,9 @@ pub fn default_keybindings() -> HashMap<KeyEvent, Action> {
     keybindings.insert(KeyEvent::new(KeyCode::Char('9'), KeyModifiers::NONE), Action::UseShortcut9);
     keybindings.insert(KeyEvent::new(KeyCode::Char('0'), KeyModifiers::NONE), Action::UseShortcut0);
 
-    //---------------------------------------------------Exit------------------------------------------------------------------------\\
+    //---------------------------------------------------MISC------------------------------------------------------------------------\\
     keybindings.insert(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE), Action::Quit);
+    keybindings.insert(KeyEvent::new(KeyCode::Char(' '), KeyModifiers::ALT), Action::CastCommandLineSpell);
 
     keybindings
 }
