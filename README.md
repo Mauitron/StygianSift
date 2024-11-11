@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./StygianSift_logo.svg" width="1100" alt="StygianSift Logo">
+  <img src="./StygianSift_logo2.svg" width="1100" alt="StygianSift Logo">
 </div>
 
 ### If you like StygianSift or want to see more from me, please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
