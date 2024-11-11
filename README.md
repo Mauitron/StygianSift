@@ -36,9 +36,10 @@ dream of functionality wrapped in a user interface that actually makes sense.
 
 Embrace the command line, mortal! Navigate your files with the wild abandon of the 
 caffeinated genius that you are! If you need more, summon the terminal within the selected 
-directory to perform more complex commands. Return to StygianSift when you're done, no 
-breadcrumbs needed. Who needs pointing devices when your coding-pinkies could bench more than 
-you? Ask yourself, Why point-and-click when you can type-and-curse?
+directory to perform more complex commands. With autocompletions and suggestions!
+Return to StygianSift when you're done, no breadcrumbs needed. Who needs pointing devices
+when your coding-pinkies could bench more than you? Ask yourself, Why point-and-click
+when you can type-and-curse?
 
 ## 🎨 Paint Your Files & Directories with Colors
 ![image](https://github.com/user-attachments/assets/c2f5eb37-db4c-4706-9385-2a1ed3b8253c)
