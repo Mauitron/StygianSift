@@ -1,0 +1,221 @@
+<svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="backgroundGradient" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" style="stop-color:#1a2b2b"/>
+      <stop offset="100%" style="stop-color:#0a0d0f"/>
+    </radialGradient>
+  </defs>
+  <style>
+    @keyframes glitch {
+      0% { transform: translate(0, 0); filter: brightness(1); }
+      20% { transform: translate(-2px, 2px); filter: brightness(1.2) blur(0.5px); }
+      40% { transform: translate(2px, -2px); filter: brightness(0.9); }
+      60% { transform: translate(-2px, 0); filter: brightness(1.1) blur(1px); }
+      80% { transform: translate(2px, 2px); filter: brightness(1); }
+      100% { transform: translate(0, 0); filter: brightness(1); }
+    }
+    .text {
+      animation: glitch 3s infinite;
+      text-shadow: 0 0 8px #00ff9d, 0 0 12px #00ff9d;
+    }
+    .particle {
+      mix-blend-mode: screen;
+    }
+  </style>
+  <!-- Gradient background -->
+  <rect width="400" height="200" fill="url(#backgroundGradient)"/>
+  
+  <!-- First layer of particles -->
+  <g>
+    <!-- Left side particles -->
+    <circle class="particle" r="1.2" fill="#00b36e">
+      <animate attributeName="opacity" 
+               dur="6s" 
+               values="0;0.2;0.6;0"
+               keyTimes="0;0.3;0.6;1" 
+               repeatCount="indefinite"
+               begin="-3s"/>
+      <animateMotion 
+        dur="6s" 
+        repeatCount="indefinite"
+        begin="-3s"
+        path="M200,105 q-40,-60 -80,-90"/>
+    </circle>
+    <circle class="particle" r="1.0" fill="#008c55">
+      <animate attributeName="opacity" 
+               dur="5s" 
+               values="0;0.2;0.5;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-2s"/>
+      <animateMotion 
+        dur="5s" 
+        repeatCount="indefinite"
+        begin="-2s"
+        path="M200,105 q-50,-50 -90,-100"/>
+    </circle>
+    
+    <!-- Center particles -->
+    <circle class="particle" r="1.1" fill="#00cc7a">
+      <animate attributeName="opacity" 
+               dur="5.6s" 
+               values="0;0.3;0.7;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-1s"/>
+      <animateMotion 
+        dur="5.6s" 
+        repeatCount="indefinite"
+        begin="-1s"
+        path="M200,105 q30,-60 90,-90"/>
+    </circle>
+    
+    <!-- Right side particles -->
+    <circle class="particle" r="0.9" fill="#006644">
+      <animate attributeName="opacity" 
+               dur="5.8s" 
+               values="0;0.2;0.4;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-5s"/>
+      <animateMotion 
+        dur="5.8s" 
+        repeatCount="indefinite"
+        begin="-5s"
+        path="M200,105 q45,-55 75,-115"/>
+    </circle>
+  </g>
+
+  <!-- Second layer of particles -->
+  <g>
+    <!-- Far left particles -->
+    <circle class="particle" r="1.0" fill="#009966">
+      <animate attributeName="opacity" 
+               dur="4.2s" 
+               values="0;0.2;0.5;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-1.5s"/>
+      <animateMotion 
+        dur="4.2s" 
+        repeatCount="indefinite"
+        begin="-1.5s"
+        path="M200,105 q-60,-40 -100,-80"/>
+    </circle>
+    
+    <!-- Left-center particles -->
+    <circle class="particle" r="0.8" fill="#00804d">
+      <animate attributeName="opacity" 
+               dur="5.2s" 
+               values="0;0.2;0.4;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-2.5s"/>
+      <animateMotion 
+        dur="5.2s" 
+        repeatCount="indefinite"
+        begin="-2.5s"
+        path="M200,105 q-20,-70 -40,-120"/>
+    </circle>
+    
+    <!-- Right-center particles -->
+    <circle class="particle" r="1.1" fill="#00e68a">
+      <animate attributeName="opacity" 
+               dur="4.8s" 
+               values="0;0.3;0.6;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-3.5s"/>
+      <animateMotion 
+        dur="4.8s" 
+        repeatCount="indefinite"
+        begin="-3.5s"
+        path="M200,105 q20,-70 40,-120"/>
+    </circle>
+    
+    <!-- Far right particles -->
+    <circle class="particle" r="0.9" fill="#00734d">
+      <animate attributeName="opacity" 
+               dur="5.5s" 
+               values="0;0.2;0.5;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-4s"/>
+      <animateMotion 
+        dur="5.5s" 
+        repeatCount="indefinite"
+        begin="-4s"
+        path="M200,105 q60,-40 100,-80"/>
+    </circle>
+  </g>
+
+  <!-- Vertical particles -->
+  <g>
+    <!-- Spread across text width -->
+    <circle class="particle" r="1.0" fill="#00a673">
+      <animate attributeName="opacity" 
+               dur="4s" 
+               values="0;0.3;0.6;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="0s"/>
+      <animateMotion 
+        dur="4s" 
+        repeatCount="indefinite"
+        begin="0s"
+        path="M200,105 v-100"/>
+    </circle>
+    <circle class="particle" r="0.8" fill="#008059">
+      <animate attributeName="opacity" 
+               dur="5s" 
+               values="0;0.2;0.5;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-2s"/>
+      <animateMotion 
+        dur="5s" 
+        repeatCount="indefinite"
+        begin="-2s"
+        path="M200,105 v-120"/>
+    </circle>
+    <circle class="particle" r="1.1" fill="#00bf8c">
+      <animate attributeName="opacity" 
+               dur="4.5s" 
+               values="0;0.3;0.7;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-3s"/>
+      <animateMotion 
+        dur="4.5s" 
+        repeatCount="indefinite"
+        begin="-3s"
+        path="M200,105 v-90"/>
+    </circle>
+    <circle class="particle" r="0.9" fill="#008c66">
+      <animate attributeName="opacity" 
+               dur="5.5s" 
+               values="0;0.2;0.5;0"
+               keyTimes="0;0.3;0.6;1"
+               repeatCount="indefinite"
+               begin="-1s"/>
+      <animateMotion 
+        dur="5.5s" 
+        repeatCount="indefinite"
+        begin="-1s"
+        path="M200,105 v-110"/>
+    </circle>
+  </g>
+  
+  <!-- Main text -->
+  <text x="200" y="105" class="text" text-anchor="middle" 
+        font-family="monospace" font-size="24" fill="#00ff9d">
+    StygianSift
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="200" y="130" class="text" text-anchor="middle" 
+        font-family="monospace" font-size="12" fill="#00ff9d" 
+        opacity="0.8">
+    Navigate the Digital Styx
+  </text>
+</svg>
