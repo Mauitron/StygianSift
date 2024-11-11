@@ -20,6 +20,7 @@
 - [The config file your digital diary](#-the-config-file-your-digital-diary)
 - [Crafted by a boatman with more loose screws than the argo](#️-crafted-by-a-boatman-with-more-loose-screws-than-the-argo)
 - [Multi-select because why stop at one](#-multi-select-because-why-stop-at-one)
+- [Installation](#-installation)
 
 ## 📚 Embark on a Slightly Unhinged File Management Adventure
 
@@ -311,7 +312,7 @@ iambic pentameter).
 - Inode information
 - Hard link counting
 
-## Installation
+# 💽 Installation
 
 ### Requirements
 - Rust (latest stable version)
