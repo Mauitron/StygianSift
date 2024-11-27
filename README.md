@@ -132,7 +132,7 @@ shape-shifting marvel:
 - Watch your directories dance in excitement as they do your bidding!
 
 ## 🤤 A Visually Seductive Interface... Which is Not a Wierd Thing to Say!
-![mouse_context_menu](https://github.com/user-attachments/assets/e337522b-9111-4591-a767-50e80d5b8de7)
+![output_optimized](https://github.com/user-attachments/assets/81ed21a2-c019-4ec1-8cb5-0c0e28cd408d)
 
 - Dress the it down, if you're more into that sort of thing.
 - Entries fade based on distance from your selection
