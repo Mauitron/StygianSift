@@ -1,17 +1,22 @@
 /*
- * Stygian Sift - A Terminal-based File Manager
- * Copyright (c) 2024 Maui The Magnificent (Charon)
+* Stygian Sift - A Terminal-based File Manager
+ * Copyright (C) 2024 Maui The Magnificent (Charon)
  *
- * This software is released under the Stygian Sift License.
- * See LICENSE file in the project root or visit:
- * https://github.com/Mauitron/StygianSift.git
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Created by: Maui The Magnificent (Charon)
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
  * Contact: Maui_The_Magnificent@proton.me
- *
- * When using, modifying, or distributing this software,
- * please maintain this attribution notice and provide a link
- * to the original project.
+ * Project repository: https://github.com/Mauitron/StygianSift.git
  */
 
 use std::env::current_dir;
