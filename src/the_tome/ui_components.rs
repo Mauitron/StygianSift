@@ -14,6 +14,8 @@
  * to the original project.
  */
 
+use crossterm::style::SetColors;
+
 use super::*;
 use std::{fmt, io::Cursor, sync::Mutex};
 
@@ -40,7 +42,7 @@ pub struct DimmingConfig {
 }
 
 impl DimmingConfig {
-    pub fn new(visible_lines: usize) -> Self {
+    pub fn new(visible_lines: usize, config: &Config) -> Self {
         let (width, height) = size().unwrap();
         let end_y = height - 16;
         let _start_y = 5;
@@ -52,10 +54,9 @@ impl DimmingConfig {
         let max_distance = (visible_lines as i32 * 4).max(1).min(end_y.into());
 
         let dim_step = (110_u8).saturating_div(max_distance as u8);
-
         DimmingConfig {
-            max_distance,
-            dim_step,
+            max_distance: config.max_distance,
+            dim_step: config.dim_step,
             max_dim: 100,
         }
     }
@@ -88,9 +89,8 @@ impl DimmingConfig {
                         b: new_value,
                     }
                 } else {
-                    // For adjusting saturation, moving colors closer to grayscale. play with it
                     let gray_value =
-                        (r as f32 * 0.299 + g as f32 * 0.587 + b as f32 * 0.114) as f32;
+                        (r as f32 * 0.300 + g as f32 * 0.580 + b as f32 * 0.115) as f32;
 
                     let new_r = ((r as f32 - gray_value) * saturation_factor + gray_value)
                         * brightness_factor;
@@ -193,17 +193,6 @@ fn add_green_tint(color: Color) -> Color {
             }
         }
     }
-}
-pub fn cleanup_terminal() -> io::Result<()> {
-    let mut stdout = io::stdout();
-    execute!(stdout, Clear(ClearType::All))?;
-    execute!(stdout, MoveTo(0, 0))?;
-    execute!(stdout, Show)?;
-
-    disable_raw_mode()?;
-
-    stdout.flush()?;
-    Ok(())
 }
 
 #[rustfmt::skip]
@@ -341,10 +330,15 @@ let mut current_page = 1;
                     ("F2".to_string(), "Show layer overview and shortcuts"),
                 ],
             ),
-
             (
-        "",
-                vec![(" ".to_string(), "")],
+                "Visual Settings",
+                vec![
+                    (get_key_for_action(&Action::DecreaseDimDistance).trim_matches('"').to_string(), "Decrease dimming distance"),
+                    (get_key_for_action(&Action::IncreaseDimDistance).trim_matches('"').to_string(), "Increase dimming distance"),
+                    (get_key_for_action(&Action::DecreaseDimIntensity).trim_matches('"').to_string(), "Decrease dimming intensity"),
+                    (get_key_for_action(&Action::IncreaseDimIntensity).trim_matches('"').to_string(), "Increase dimming intensity"),
+                    (get_key_for_action(&Action::BorderStyle).trim_matches('"').to_string(), "Toggle border style"),
+                ],
             ),
             (
         "",
@@ -452,6 +446,69 @@ let mut current_page = 1;
     Ok(())
 }
 #[rustfmt::skip]
+pub fn draw_simple_border(stdout: &mut impl Write, page_state: &PageState) -> io::Result<()> {
+    let _ = page_state;
+    let (width, height) = size()?;
+    let nav_width = width / 2;
+    let preview_width = width - nav_width - 1;
+    // Draw top border
+    queue!(stdout, MoveTo(4, 2))?;
+    write!(
+        stdout,
+        "{}{}{}",
+        "─".repeat(nav_width as usize - 7),
+        "────",
+        "─".repeat(preview_width as usize - 5),
+    )?;
+
+    for y in 3..height - 2 {
+        // Left border
+        queue!(stdout, MoveTo(4, y))?;
+        write!(stdout, "│")?;
+
+        // Middle border
+        queue!(stdout, MoveTo(nav_width, y))?;
+        write!(stdout, "│")?;
+
+        // Right border
+        queue!(stdout, MoveTo(width - 5, y))?;
+        write!(stdout, "│")?;
+    }
+
+    // bottom border
+    queue!(stdout, MoveTo(4, height - 2))?;
+    write!(
+        stdout,
+        "{}",
+        "─".repeat(nav_width as usize - 7),
+    )?;
+    queue!(stdout, MoveTo(nav_width - 3, height - 2))?;
+    write!(stdout, "────")?;
+    queue!(stdout, MoveTo(nav_width + 1, height - 2))?;
+    write!(
+        stdout,
+        "{}",
+        "─".repeat(preview_width as usize - 5),
+    )?;
+
+    queue!(stdout, MoveTo(4, 2))?;
+    write!(stdout, "┌")?;
+    queue!(stdout, MoveTo(width - 5, 2))?;
+    write!(stdout, "┐")?;
+    queue!(stdout, MoveTo(4, height - 2))?;
+    write!(stdout, "└")?;
+    queue!(stdout, MoveTo(width - 5, height - 2))?;
+    write!(stdout, "┘")?;
+
+    queue!(stdout, MoveTo(nav_width, 2))?;
+    write!(stdout, "┬")?;
+    queue!(stdout, MoveTo(nav_width, height - 2))?;
+    write!(stdout, "┴")?;
+
+    stdout.flush()
+}
+
+#[rustfmt::skip]
 pub fn draw_initial_border(stdout: &mut impl Write, page_state: &PageState) -> io::Result<()> {
     let _ = page_state;
     let (width, height) = size()?;
@@ -553,11 +610,11 @@ pub fn draw_initial_border(stdout: &mut impl Write, page_state: &PageState) -> i
         "{}",
         "⩲".dark_red().to_string().repeat(nav_width as usize - 1),
     )?;
-    queue!(stdout, MoveTo(preview_width + 2 , height - 2))?;
+    queue!(stdout, MoveTo(preview_width + 1 , height - 2))?;
     write!(
         stdout,
         "{}",
-        "⨌".dark_yellow().to_string().repeat(nav_width as usize - 6),
+        "⨌".dark_yellow().to_string().repeat(nav_width as usize - 5),
     )?;
     queue!(stdout, SetForegroundColor(Color::DarkYellow))?;
     queue!(stdout, MoveTo(nav_width - 3, height - 3))?;
@@ -571,7 +628,7 @@ pub fn draw_initial_border(stdout: &mut impl Write, page_state: &PageState) -> i
     )?;
 
     queue!(stdout, MoveTo(preview_width - 2, height - 2))?;
-    write!(stdout, "{}", "\\\\/".red())?;
+    write!(stdout, "{}", "\\/".red())?;
 
     queue!(stdout, MoveTo(nav_width - 3, height))?;
     write!(stdout, "{}", "⨅⨅⨅⨅".red())?;
@@ -625,10 +682,10 @@ pub fn clear_preview() -> io::Result<()> {
     let end_y = height - 2;
     let start_y = 5;
     let nav_width = width / 2;
-    let preview_width = width - nav_width - 2;
+    let preview_width = width - nav_width;
     for a in start_y..end_y {
-        execute!(stdout(), MoveTo(preview_width + 3, a - 2))?;
-        write!(stdout(), "{}", " ".repeat(preview_width as usize - 4),)?;
+        execute!(stdout(), MoveTo(preview_width, a - 2))?;
+        write!(stdout(), "{}", " ".repeat(preview_width as usize - 9),)?;
     }
 
     stdout().flush()?;
@@ -682,6 +739,7 @@ pub fn sort_order_to_string(order: &SortOrder) -> StyledContent<&str> {
         SortOrder::DateModifiedDesc => "Date Modified (New to Old) ↓".green(),
     }
 }
+
 pub fn write_header(
     stdout: &mut impl Write,
     show_count: bool,
@@ -692,7 +750,6 @@ pub fn write_header(
     let _ = show_count;
     let (width, height) = size()?;
     let nav_width = width / 2;
-
     queue!(stdout, MoveTo(0, 1))?;
     writeln!(
         stdout,
@@ -716,14 +773,14 @@ pub fn write_header(
         "Sort: {}",
         sort_order_to_string(sort_order),
         // if show_count { "🟢" } else { "🔴" }, // Not in use, yet.
-        // display_lines.to_string().green() // appearently not in use either, I have no idea what i did, too long ago.
     )?;
 
     Ok(())
 }
 
 #[rustfmt::skip]
-fn display_file_info_or_preview(
+pub fn display_file_info_or_preview(
+    app_state: &mut AppState,
     stdout: &mut impl Write,
     entry: &FileEntry,
     nav_width: u16,
@@ -731,7 +788,6 @@ fn display_file_info_or_preview(
     start_y: u16,
     end_y: u16,
     is_preview: bool,
-    page_state: &mut PageState,
 ) -> io::Result<()> {
     let _ = preview_width;
     let _ = nav_width;
@@ -742,128 +798,166 @@ fn display_file_info_or_preview(
     let clear_width = preview_width * 5 / 6;
     let available_width = clear_width as usize;
     
-    update_page_num(page_state)?;
-    page_state.update_right_page(start_y.into(), end_y.into());
-        let animation_duration = Duration::from_millis(0); // total animation time. set to 0 for the time being.
-        let current_end_y = start_y + ((end_y - start_y) as f32 * (preview_width as f32)) as u16;
-        let dimming_config = DimmingConfig::new((current_end_y  - start_y) as usize);
+    update_page_num(&app_state.page_state)?;
+    app_state.page_state.update_right_page(start_y.into(), end_y.into());
+    let animation_duration = Duration::from_millis(0);
+    let current_end_y = start_y + ((end_y - start_y) as f32 * (preview_width as f32)) as u16;
+    let dimming_config = DimmingConfig::new((current_end_y - start_y) as usize, &app_state.config);
 
     if is_preview {
         let start_time = Instant::now();
-        
-        
         loop {
             let elapsed = start_time.elapsed();
             if elapsed >= animation_duration {
-                render_preview_frame(stdout, entry, nav_width, preview_width, start_y, end_y, 1.0)?;
+                render_preview_frame(app_state, stdout, entry, nav_width, preview_width, start_y, end_y, 1.0)?;
                 break;
             }
-
             let progress = elapsed.as_secs_f32() / animation_duration.as_secs_f32();
-            render_preview_frame(stdout, entry, nav_width, preview_width, start_y, end_y, progress)?;
-            
+            render_preview_frame(app_state, stdout, entry, nav_width, preview_width, start_y, end_y, progress)?;
         }
     } else {
+        let metadata = match fs::metadata(&entry.path) {
+            Ok(meta) => meta,
+            Err(e) => {
+                queue!(stdout, MoveTo(nav_width + 4, start_y - 3))?;
+                writeln!(stdout, "Error: Unable to read file metadata")?;
+                queue!(stdout, MoveTo(nav_width + 4, start_y - 2))?;
+                writeln!(stdout, "Reason: {}", e)?;
+                return Ok(());
+            }
+        };
 
-            let metadata = match fs::metadata(&entry.path) {
-                Ok(meta) => meta,
-                Err(e) => {
-                    queue!(stdout, MoveTo(nav_width + 4, start_y - 3))?;
-                    writeln!(stdout, "Error: Unable to read file metadata")?;
-                    queue!(stdout, MoveTo(nav_width + 4, start_y - 2))?;
-                    writeln!(stdout, "Reason: {}", e)?;
-                    return Ok(());
-                }
-            };
+        let format_time = |duration: Option<Duration>| -> String {
+            duration.map_or_else(
+                || "Unknown".to_string(),
+                |d| {
+                    let secs = d.as_secs();
+                    format!(
+                        "{}-{:02}-{:02} {:02}:{:02}:{:02}",
+                        1970 + secs / 31536000,
+                        (secs % 31536000) / 2592000 + 1,
+                        (secs % 2592000) / 86400 + 1,
+                        (secs % 86400) / 3600,
+                        (secs % 3600) / 60,
+                        secs % 60
+                    )
+                },
+            )
+        };
 
-            let format_time = |duration: Option<Duration>| -> String {
-                duration.map_or_else(
-                    || "Unknown".to_string(),
-                    |d| {
-                        let secs = d.as_secs();
-                        format!(
-                            " {}-{:02}-{:02} {:02}:{:02}:{:02}",
-                            1970 + secs / 31536000,
-                            (secs % 31536000) / 2592000 + 1,
-                            (secs % 2592000) / 86400 + 1,
-                            (secs % 86400) / 3600,
-                            (secs % 3600) / 60,
-                            secs % 60
-                        )
-                    },
-                )
-            };
-
- for i in 0..12 {
+        for i in 0..12 {
             queue!(stdout, MoveTo(nav_width + 4, start_y + i - 5))?;
             writeln!(stdout, "{}", " ".repeat(preview_width as usize - 7))?;
         }
-            let info = vec![
-                ("CHAPTER", entry.name.to_ascii_uppercase()),
-                ("Type", format!("{:?}", entry.file_type)),
-                ("Size", format_size(entry.size)),
-                ("Created", format_time(metadata.created().ok().and_then(|t| t.duration_since(UNIX_EPOCH).ok()))),
-                ("Modified", format_time(metadata.modified().ok().and_then(|t| t.duration_since(UNIX_EPOCH).ok()))),
-                ("Accessed", format_time(metadata.accessed().ok().and_then(|t| t.duration_since(UNIX_EPOCH).ok()))),
-                ("Permissions", format!("{:o}", metadata.mode())),
-                ("Owner", format!("{}:{}", metadata.uid(), metadata.gid())),
-                ("Inode", metadata.ino().to_string()),
-                ("Number of hard links", metadata.nlink().to_string()),
-                ("Read-only", if entry.read_only { "Yes" } else { "No" }.to_string()),
-                ("Admin required", if entry.admin_required { "Yes" } else { "No" }.to_string()),
-            ];
 
-            let current_max_items = ((current_end_y - start_y + 3) as f32) as usize;
+        let read_only = check_readonly(&metadata);
+        let admin_required = check_admin_required_cross_platform(&entry.path)?;
 
-            for (i, (label, value)) in info.iter().enumerate() {
-                if i >= current_max_items { break; }
-                if start_y - 3 + i as u16 >= end_y { break; }
-                
-                let distance = i  as i32;
-                let dim_factor = dimming_config.calculate_dimming(distance);
-                
-                queue!(stdout, MoveTo(nav_width + 4, start_y - 5 + i as u16))?;
+        #[cfg(unix)]
+        let owner_info = {
+            use std::os::unix::fs::MetadataExt;
+            format!("{}:{}", metadata.uid(), metadata.gid())
+        };
+        #[cfg(windows)]
+        let owner_info = "N/A".to_string();
 
-                let formatted_line = match (i, *label) {
-                    (0, _) => {
-                        let base_color = Color::Green;
-                        let dimmed_color = DimmingConfig::dim_color(base_color, dim_factor);
-                        queue!(stdout, MoveTo(nav_width + 4, start_y - 5 + i as u16))?;
-                        queue!(stdout, SetForegroundColor(dimmed_color))?;
-                        format!("{}: {}", label, value).bold().to_string()
-                    },
-                    (_, "Read-only" | "Admin required") => {
-                        let base_color = if value == "Yes" { Color::Red } else { Color::Green };
-                        let dimmed_color = DimmingConfig::dim_color(base_color, dim_factor);
-                        queue!(stdout, SetForegroundColor(dimmed_color))?;
-                        format!("{}: {}", label, value)
-                    },
-                    _ => {
-                        let base_color = Color::Reset;
-                        let dimmed_color = DimmingConfig::dim_color(base_color, dim_factor);
-                        queue!(stdout, SetForegroundColor(dimmed_color))?;
-                        format!("{}: {}", label, value)
-                    },
-                };
-                write!(stdout, "{}", truncate_str(&formatted_line, available_width))?;
-            }
+        #[cfg(unix)]
+        let permissions = {
+            use std::os::unix::fs::MetadataExt;
+            format!("{:o}", metadata.mode())
+        };
+        #[cfg(windows)]
+        let permissions = {
+            use std::os::windows::fs::MetadataExt;
+            format!("0x{:x}", metadata.file_attributes())
+        };
+
+        let color_info = if let Some(color) = app_state.get_item_color(&entry.path) {
+            let rule = app_state.get_color_rule(&color)
+                .unwrap_or(&ColorRule::default()).clone();
+            vec![
+                ("COLOR RULES", format!("{}", color.as_str().to_uppercase())),
+                ("Delete allowed", if rule.allow_delete { "Yes" } else { "No" }.to_string()),
+                ("Rename allowed", if rule.allow_rename { "Yes" } else { "No" }.to_string()),
+                ("Move allowed", if rule.allow_move { "Yes" } else { "No" }.to_string()),
+                ("Copy allowed", if rule.allow_copy { "Yes" } else { "No" }.to_string()),
+                ("Search included", if rule.include_in_search { "Yes" } else { "No" }.to_string()),
+            ]
+        } else {
+            vec![]
+        };
+
+        let mut info = vec![
+            ("CHAPTER", entry.name.to_ascii_uppercase()),
+            ("Type", format!("{:?}", entry.file_type).green().to_string()),
+            ("Size", format_size(entry.size).green().to_string()),
+            ("Created", format_time(metadata.created().ok().and_then(|t| t.duration_since(UNIX_EPOCH).ok())).green().to_string()),
+            ("Modified", format_time(metadata.modified().ok().and_then(|t| t.duration_since(UNIX_EPOCH).ok())).green().to_string()),
+            ("Accessed", format_time(metadata.accessed().ok().and_then(|t| t.duration_since(UNIX_EPOCH).ok())).green().to_string()),
+            ("Permissions", permissions.green().to_string()),
+            ("Owner", owner_info.green().to_string()),
+            #[cfg(unix)]
+            ("Inode", metadata.ino().to_string().green().to_string()),
+            #[cfg(unix)]
+            ("Number of hard links", metadata.nlink().to_string().green().to_string()),
+            ("Read-only", if read_only { "Yes ".red() } else { "No ".green() }.to_string()),
+            ("Admin required", if admin_required { "Yes ".red() } else { "No ".green() }.to_string()),
+        ];
+
+        if !color_info.is_empty() {
+            info.extend(color_info);
         }
 
-        stdout.flush()?;
-        // Delay between frames (skip delay on last frame).
-        // Leave this as an artifact of the idea. come back when
-        // I understand async in Rust better.
-        // let a = rayon::ThreadBuilder::run();
+        let current_max_items = ((current_end_y - start_y + 3) as f32) as usize;
 
-
+        for (i, (label, value)) in info.iter().enumerate() {
+            if i >= current_max_items { break; }
+            if start_y - 3 + i as u16 >= end_y { break; }
+            
+            let distance = i as i32;
+            let dim_factor = dimming_config.calculate_dimming(distance);
+            
+            queue!(stdout, MoveTo(nav_width + 4, start_y - 3 + i as u16))?;
+            let formatted_line = match (i, *label) {
+                (0, _) => {
+                    let base_color = Color::Green;
+                    let dimmed_color = DimmingConfig::dim_color(base_color, dim_factor);
+                    queue!(stdout, MoveTo(nav_width + 4, start_y - 5 + i as u16))?;
+                    queue!(stdout, SetForegroundColor(dimmed_color))?;
+                    format!("{} {}              ", label, value).bold().to_string()
+                },
+                (_, "COLOR RULES") => {
+                    queue!(stdout, MoveTo(nav_width + 4, start_y + 1 + i as u16))?;
+                    let base_color = Color::DarkYellow;
+                    let dimmed_color = DimmingConfig::dim_color(base_color, dim_factor);
+                    queue!(stdout, SetForegroundColor(dimmed_color))?;
+                    format!("{} {}               ", label, value).bold().to_string()
+                },
+                (_, "Delete allowed" | "Rename allowed" | "Move allowed" | "Copy allowed" | "Search included") => {
+            queue!(stdout, MoveTo(nav_width + 4, start_y + 1 + i as u16))?;
+                    let base_color = if value == "Yes" { Color::Green } else { Color::Red };
+                    let dimmed_color = DimmingConfig::dim_color(base_color, dim_factor);
+                    queue!(stdout, SetForegroundColor(dimmed_color))?;
+                    format!("{}: {}         ", label, value)
+                 },
+                _ => {
+                    let base_color = Color::Reset;
+                    let dimmed_color = DimmingConfig::dim_color(base_color, dim_factor);
+                    queue!(stdout, SetForegroundColor(dimmed_color))?;
+                    format!("{}: {}          ", label, value)
+                },
+            };
+            write!(stdout, "{}", truncate_str(&formatted_line, available_width))?;
+        }
+    }
     execute!(stdout, SetForegroundColor(Color::Reset), SetBackgroundColor(Color::Reset))?;
     Ok(())
 }
-
 // Animating the preview is not as simple as i thought. need to go async
 // to avoid freezing the whole program to a halt. Is not needed but would
 // be a nice addition, for the bling.
 fn render_preview_frame(
+    app_state: &mut AppState,
     stdout: &mut impl Write,
     entry: &FileEntry,
     nav_width: u16,
@@ -873,7 +967,7 @@ fn render_preview_frame(
     progress: f32,
 ) -> io::Result<()> {
     let current_end_y = start_y + ((end_y - start_y) as f32 * progress) as u16;
-    let dimming_config = DimmingConfig::new((current_end_y - start_y) as usize);
+    let dimming_config = DimmingConfig::new((current_end_y - start_y) as usize, &app_state.config);
 
     clear_preview()?;
 
@@ -948,6 +1042,7 @@ fn render_preview_frame(
     stdout.flush()?;
     Ok(())
 }
+
 #[rustfmt::skip]
 pub fn write_entry(
     app_state: &AppState,
@@ -958,105 +1053,111 @@ pub fn write_entry(
     width: u16,
     dimming_config: &DimmingConfig,
 ) -> io::Result<()> {
+    let is_multi_selected = app_state.multiple_selected_files
+        .as_ref()
+        .map_or(false, |selected| selected.contains(&entry.path));
+
+    let is_hovered = app_state.mouse_state.hovered_index
+        .map_or(false, |idx| idx == app_state.scroll_state.offset + distance_from_selected as usize);
+
     let (icon, name) = match entry.file_type {
         FileType::Directory => ("📁", format!("{}/", entry.name)),
         _ => ("📄", entry.name.clone()),
     };
-
     let size_str = if let FileType::Directory = entry.file_type {
         String::new()
     } else {
         format_size(entry.size)
     };
-    // Add more in the future. Don't forget.
+
+    let metadata = fs::metadata(&entry.path)?;
+    let admin_required = check_admin_required_cross_platform(&entry.path).expect("Checking admin failed");
+    let readonly = check_readonly(&metadata);
+
     let (type_icon, permission_icon) = match entry.file_type {
-        FileType::Directory => (" ", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Text => ("📄", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Log => ("📜", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Document => ("📘", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Image => ("🌃", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Binary => ("💽", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Config => ("📑", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Executable => ("🎮", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Unknown => ("  ", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Rust => ("🦀", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Nix => ("❄", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
-        FileType::Zig => ("⚡", if entry.admin_required { "🔐" } else if entry.read_only { "🔏" } else { " " }),
+        FileType::Directory => (" ", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Text => ("📄", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Log => ("📜", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Document => ("📘", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Image => ("🌃", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Binary => ("💽", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Config => ("📑", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Executable => ("🎮", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Unknown => ("  ", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Rust => ("🦀", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Nix => ("❄", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
+        FileType::Zig => ("⚡", if admin_required { "🔐" } else if readonly { "🔏" } else { " " }),
     };
 
-   let available_width = width as usize - 34;
+    let available_width = width as usize - 34;
     let truncated_name = truncate_str(&name, available_width);
     let marker_color = app_state.config.get_item_color(&entry.path);
-    let is_multi_selected = app_state.multiple_selected_files.as_ref().map_or(false, |selected| selected.contains(&entry.path));
-    let dim_factor = dimming_config.calculate_dimming(distance_from_selected);
-
-    fn enhance_color(color: Color) -> Color {
-        match color {
-            Color::Rgb { r, g, b } => {
-                let enhance = 8.0;
-                let new_r = ((r as f32 - 128.0) * enhance + 128.0).clamp(0.0, 255.0) as u8;
-                let new_g = ((g as f32 - 128.0) * enhance + 128.0 + 25.0).clamp(0.0, 255.0) as u8;
-                let new_b = ((b as f32 - 128.0) * enhance + 128.0).clamp(0.0, 255.0) as u8;
-                
-                Color::Rgb { r: new_r, g: new_g, b: new_b }
-            }
-            _ => color,
-        }
-    }
-
-    let base_fg = if is_multi_selected {
-        marker_color.map_or(Color::White, |c| c.to_color())
-    } else if is_selected {
-        if let Some(color) = marker_color {
-            enhance_color(color.to_color())
-        } else {
-            Color::Rgb { r: 220, g: 245, b: 220 }
-        }
-    } else if let Some(color) = marker_color {
+    let base_color = if let Some(color) = marker_color {
         color.to_color()
     } else {
         Color::Reset
     };
 
-    let fg_color = if !is_selected {
-        DimmingConfig::dim_color(base_fg, dim_factor)
-    } else if !app_state.changing_color {
-        Color::DarkGreen
-    } else {
-        base_fg
-    };
+    match app_state.input_mode {
+        InputMode::Keyboard => {
+            let dim_factor = dimming_config.calculate_dimming(distance_from_selected);
+            let fg_color = if is_selected || is_multi_selected {  
+                Color::DarkGreen
+            } else {
+                DimmingConfig::dim_color(base_color, dim_factor)
+            };
 
-    // Set background color for multi-selected items. 
-    // I need to check how it looks on a multitude of terminals.
-    let bg_color = if is_multi_selected {
-        Color::Rgb { r: 40, g: 44, b: 102 } 
-    } else {
-        Color::Reset
-    };
+            queue!(stdout, SetForegroundColor(fg_color))?;
+            if is_selected{  
+                queue!(stdout, SetAttribute(Attribute::Bold))?;
+            }
 
-    queue!(
-        stdout,
-        SetForegroundColor(fg_color),
-        SetBackgroundColor(bg_color)  
-    )?;
+            write!(
+                stdout,
+                "{:1} {} {:<width$} {:>10} {} {}",
+                if is_selected { " → " } else if is_multi_selected { " * " } else { "   " }, 
+                icon,
+                truncated_name,
+                size_str,
+                type_icon,
+                permission_icon,
+                width = available_width
+            )?;
+        },
+        InputMode::Mouse => {
+            let distance_from_hover = if let Some(hover_idx) = app_state.mouse_state.hovered_index {
+                (hover_idx as i32 - (app_state.scroll_state.offset + distance_from_selected as usize) as i32).abs()
+            } else {
+                distance_from_selected
+            };
 
-    if is_selected {
-        queue!(stdout, SetAttribute(Attribute::Bold))?;
+            let dim_factor = dimming_config.calculate_dimming(distance_from_hover);
+            let fg_color = if is_multi_selected {  
+                Color::DarkGreen
+            } else {
+                DimmingConfig::dim_color(base_color, dim_factor)
+            };
+
+            queue!(stdout, SetForegroundColor(fg_color))?;
+            if is_hovered || is_multi_selected {  
+                queue!(stdout, SetAttribute(Attribute::Bold))?;
+            }
+
+            write!(
+                stdout,
+                "{} {} {:<width$} {:>10} {} {}",
+                if is_hovered { " ≫ " } else if is_multi_selected { " * " } else { "   " },  
+                icon,
+                truncated_name,
+                size_str,
+                type_icon,
+                permission_icon,
+                width = available_width
+            )?;
+        }
     }
 
-    write!(
-        stdout,
-        "{:1} {} {:<width$} {:>10} {} {}",
-        if is_selected { " → " } else { "  " },
-        icon,
-        truncated_name,
-        size_str,
-        type_icon,
-        permission_icon,
-        width = available_width
-    )?;
-
-    execute!(
+    queue!(
         stdout,
         SetAttribute(Attribute::Reset),
         SetForegroundColor(Color::Reset),
@@ -1065,7 +1166,6 @@ pub fn write_entry(
     
     Ok(())
 }
-// Go over more carefully. try making the preview and dir async.
 pub fn display_directory(
     app_state: &mut AppState,
     entries: &[FileEntry],
@@ -1088,7 +1188,7 @@ pub fn display_directory(
     let adjusted_selected_index = selected_index.min(total_entries.saturating_sub(1));
     let middle_line = visible_lines / 2;
 
-    let dimming_config = DimmingConfig::new(visible_lines);
+    let dimming_config = DimmingConfig::new(visible_lines, &app_state.config);
 
     let new_scroll_offset = if total_entries <= visible_lines {
         0
@@ -1104,20 +1204,30 @@ pub fn display_directory(
         scroll_offset = new_scroll_offset;
     }
 
-    if full_redraw {
+    if full_redraw && app_state.mouse_state.context_menu.is_none() {
         execute!(stdout, Clear(ClearType::All))?;
-        draw_initial_border(stdout, &app_state.page_state)?;
+        if app_state.config.draw_simple_borders {
+            draw_simple_border(stdout, &app_state.page_state)?;
+        } else {
+            draw_initial_border(stdout, &app_state.page_state)?;
+        }
     }
 
-    write_header(
-        stdout,
-        app_state.show_count,
-        visible_lines,
-        current_dir,
-        &app_state.config.default_sort,
-    )?;
-    stdout.flush()?;
-    display_git_info(stdout, current_dir, nav_width, start_y - 1)?;
+    if app_state.mouse_state.context_menu.is_none() {
+        write_header(
+            stdout,
+            app_state.show_count,
+            visible_lines,
+            current_dir,
+            &app_state.config.default_sort,
+        )?;
+        stdout.flush()?;
+    }
+    app_state.is_git_repo = is_git_repo(current_dir);
+    if app_state.is_git_repo {
+        app_state.update_current_dir(current_dir.to_path_buf());
+        display_git_info(stdout, &current_dir, nav_width, start_y - 1)?;
+    }
     app_state.scroll_state.offset = scroll_offset;
 
     let stdout_mutex = Mutex::new(&mut *stdout);
@@ -1157,38 +1267,45 @@ pub fn display_directory(
             }
         })
         .collect();
+    if app_state.mouse_state.context_menu.is_none() {
+        for (y, output) in output_data {
+            let mut stdout_guard = stdout_mutex.lock().unwrap();
+            queue!(stdout_guard, MoveTo(5, y + 2))?;
+            write!(stdout_guard, "{}", output)?;
+        }
+        if app_state.input_mode == InputMode::Mouse {
+            app_state.mouse_state.nav_buttons.show();
+            app_state.mouse_state.nav_buttons.draw(stdout, nav_width)?;
+        } else {
+            app_state.mouse_state.nav_buttons.hide();
+        }
 
-    for (y, output) in output_data {
-        let mut stdout_guard = stdout_mutex.lock().unwrap();
-        queue!(stdout_guard, MoveTo(5, y + 2))?;
-        write!(stdout_guard, "{}", output)?;
+        execute!(stdout, cursor::Hide)?;
+
+        if scroll_offset > 0 {
+            queue!(stdout, MoveTo(nav_width / 2, (height / 5) - 1))?;
+            write!(stdout, "{}", "▲".green())?;
+        } else {
+            queue!(stdout, MoveTo(nav_width / 2, (height / 5) - 1))?;
+            write!(stdout, " ")?;
+        }
+
+        if scroll_offset + visible_lines < total_entries {
+            queue!(stdout, MoveTo(nav_width / 2, height - 6))?;
+            write!(stdout, "{}", "▼".green())?;
+        } else {
+            queue!(stdout, MoveTo(nav_width / 2, height - 6))?;
+            write!(stdout, " ")?;
+        }
+
+        queue!(stdout, SetForegroundColor(Color::Reset))?;
+        stdout.flush()?;
     }
-
-    execute!(stdout, cursor::Hide)?;
-
-    // Scroll indicators, reflect on if the color should change on distance.
-    if scroll_offset > 0 {
-        queue!(stdout, MoveTo(nav_width / 2, (height / 5) - 1))?;
-        write!(stdout, "{}", "▲".green())?;
-    } else {
-        queue!(stdout, MoveTo(nav_width / 2, (height / 5) - 1))?;
-        write!(stdout, " ")?;
-    }
-
-    if scroll_offset + visible_lines < total_entries {
-        queue!(stdout, MoveTo(nav_width / 2, height - 6))?;
-        write!(stdout, "{}", "▼".green())?;
-    } else {
-        queue!(stdout, MoveTo(nav_width / 2, height - 6))?;
-        write!(stdout, " ")?;
-    }
-
-    queue!(stdout, SetForegroundColor(Color::Reset))?;
-    stdout.flush()?;
 
     if let Some(entry) = entries.get(adjusted_selected_index) {
-        if app_state.preview_active {
+        if app_state.preview_active && app_state.mouse_state.context_menu.is_none() {
             display_file_info_or_preview(
+                app_state,
                 stdout,
                 entry,
                 nav_width + 1,
@@ -1196,10 +1313,10 @@ pub fn display_directory(
                 start_y - 3,
                 end_y,
                 true,
-                &mut app_state.page_state,
             )?;
-        } else {
+        } else if app_state.mouse_state.context_menu.is_none() {
             display_file_info_or_preview(
+                app_state,
                 stdout,
                 entry,
                 nav_width,
@@ -1207,7 +1324,6 @@ pub fn display_directory(
                 start_y,
                 end_y,
                 false,
-                &mut app_state.page_state,
             )?;
         }
     }
@@ -1231,12 +1347,41 @@ pub fn display_folder_preview(
                 .take((end_y - start_y) as usize)
             {
                 let file_name = entry.file_name().to_string_lossy().into_owned();
-                let file_type = if entry.file_type()?.is_dir() {
-                    "📁"
-                } else {
-                    "📄"
+                let is_dir = entry.file_type()?.is_dir();
+                let file_type = if is_dir { "📁" } else { "📄" };
+
+                #[cfg(unix)]
+                let (admin_required, readonly) = {
+                    use std::os::unix::fs::MetadataExt;
+                    let metadata = entry.metadata()?;
+                    let mode = metadata.mode();
+                    let uid = metadata.uid();
+                    (
+                        if uid == 0 { false } else { (mode & 0o200) == 0 },
+                        (mode & 0o200) == 0,
+                    )
                 };
-                let display_string = format!("{} {}", file_type, file_name);
+                const FILE_ATTRIBUTE_READONLY: u32 = 0x1;
+                const FILE_ATTRIBUTE_SYSTEM: u32 = 0x4;
+                #[cfg(windows)]
+                let (admin_required, readonly) = {
+                    use std::os::windows::fs::MetadataExt;
+                    let metadata = entry.metadata()?;
+                    let attrs = metadata.file_attributes();
+                    (
+                        attrs & (FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_READONLY) != 0,
+                        attrs & FILE_ATTRIBUTE_READONLY != 0,
+                    )
+                };
+                let permission_icon = if admin_required {
+                    "🔐"
+                } else if readonly {
+                    "🔏"
+                } else {
+                    " "
+                };
+
+                let display_string = format!("{} {} {}", file_type, file_name, permission_icon);
                 queue!(stdout, MoveTo(start_x + 2, y))?;
                 write!(
                     stdout,
@@ -1437,11 +1582,6 @@ pub fn display_git_info(
         let branch = get_current_branch(current_dir);
         let status = get_git_status(current_dir);
         queue!(stdout, MoveTo(nav_width / 12 + 1, height / 10 + 3))?;
-        writeln!(
-            stdout,
-            "{}\r",
-            "Current directory is a Git repository".green()
-        )?;
 
         queue!(stdout, MoveTo(nav_width / 12 + 1, height / 10 + 2))?;
         execute!(stdout, SetForegroundColor(Color::Green))?;
@@ -1459,19 +1599,19 @@ pub fn display_git_info(
 pub fn clear_interaction_field() -> io::Result<()> {
     let (width, height) = size()?;
     let nav_width = width / 2;
-    let preview_width = width - nav_width - 1;
+    let preview_width = width - nav_width;
     let mut stdout = stdout();
 
-    queue!(stdout, MoveTo(preview_width + 2, height - 12))?;
-    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
-    queue!(stdout, MoveTo(preview_width + 2, height - 11))?;
-    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
-    queue!(stdout, MoveTo(preview_width + 2, height - 10))?;
-    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
-    queue!(stdout, MoveTo(preview_width + 2, height - 9))?;
-    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
-    queue!(stdout, MoveTo(preview_width + 2, height - 8))?;
-    write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
+    queue!(stdout, MoveTo(preview_width, height - 12))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 6).into()))?;
+    queue!(stdout, MoveTo(preview_width, height - 11))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 6).into()))?;
+    queue!(stdout, MoveTo(preview_width, height - 10))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 6).into()))?;
+    queue!(stdout, MoveTo(preview_width, height - 9))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 6).into()))?;
+    queue!(stdout, MoveTo(preview_width, height - 8))?;
+    write!(stdout, "{}", " ".repeat((preview_width - 6).into()))?;
     stdout.flush()?;
     Ok(())
 }

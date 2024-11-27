@@ -1,0 +1,4 @@
+target
+*.svg
+*.md
+Cargo.*

@@ -608,7 +608,7 @@ pub fn display_search_results(
                         }
                     }
                     Action::Murder => {
-                        murder_files(app_state, stdout, &results, selected_index)?;
+                        murder_files(app_state, stdout, &results, selected_index, false)?;
                         results.retain(|entry| entry.path.exists());
                         selected_index = selected_index.min(results.len() - 1);
                     }
@@ -835,7 +835,7 @@ pub fn draw_search_results(
     scroll_offset: usize,
     full_redraw: bool,
 ) -> io::Result<()> {
-    let dimming_config = DimmingConfig::new(visible_lines);
+    let dimming_config = DimmingConfig::new(visible_lines, &app_state.config);
     if full_redraw {
         execute!(stdout, Clear(ClearType::All))?;
 

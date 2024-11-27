@@ -13,7 +13,6 @@
  * please maintain this attribution notice and provide a link
  * to the original project.
  */
-
 use super::*;
 pub struct TerminalState {
     width: u16,
@@ -71,18 +70,6 @@ impl TerminalState {
         }
 
         Ok(())
-    }
-
-    pub fn get_dimensions(&self) -> (u16, u16) {
-        (self.width, self.height)
-    }
-
-    pub fn get_min_dimensions(&self) -> (u16, u16) {
-        (self.min_width, self.min_height)
-    }
-
-    pub fn get_actual_dimensions(&self) -> io::Result<(u16, u16)> {
-        size()
     }
 }
 pub struct GitInfo {
@@ -522,4 +509,75 @@ pub fn truncate_path(path: &Path, max_length: usize) -> String {
         result = new_path;
     }
     format!("{:width$}", result, width = max_length)
+}
+#[cfg(unix)]
+pub fn check_admin_required(metadata: &fs::Metadata) -> bool {
+    use std::os::unix::fs::MetadataExt;
+    let mode = metadata.mode();
+    let uid = metadata.uid();
+    if uid == 0 {
+        return false;
+    }
+    (mode & 0o200) == 0
+}
+
+#[cfg(windows)]
+pub fn check_admin_required(path: &Path, metadata: &fs::Metadata) -> bool {
+    use std::os::windows::fs::MetadataExt;
+    let attrs = metadata.file_attributes();
+    let system = (attrs & 0x4) != 0;
+    let hidden = (attrs & 0x2) != 0;
+    system || hidden
+}
+
+#[cfg(unix)]
+pub fn check_readonly(metadata: &fs::Metadata) -> bool {
+    use std::os::unix::fs::MetadataExt;
+    let mode = metadata.mode();
+    (mode & 0o200) == 0
+}
+
+#[cfg(windows)]
+pub fn check_readonly(metadata: &fs::Metadata) -> bool {
+    use std::os::windows::fs::MetadataExt;
+    let attrs = metadata.file_attributes();
+    (attrs & 0x1) != 0
+}
+pub fn check_admin_required_cross_platform(path: &Path) -> io::Result<bool> {
+    let metadata = fs::metadata(&path)?;
+
+    #[cfg(target_os = "windows")]
+    let admin_required = check_admin_required(path, &metadata);
+
+    #[cfg(not(target_os = "windows"))]
+    let admin_required = check_admin_required(&metadata);
+
+    Ok(admin_required)
+}
+pub fn initialize_terminal() -> io::Result<()> {
+    terminal::enable_raw_mode()?;
+    execute!(
+        stdout(),
+        EnterAlternateScreen,
+        EnableMouseCapture,
+        event::EnableBracketedPaste
+    )?;
+    Ok(())
+}
+
+pub fn cleanup_terminal() -> io::Result<()> {
+    let mut stdout = io::stdout();
+    execute!(stdout, Clear(ClearType::All))?;
+    execute!(stdout, MoveTo(0, 0))?;
+    execute!(stdout, Show)?;
+
+    execute!(
+        stdout,
+        DisableMouseCapture,
+        event::DisableBracketedPaste,
+        LeaveAlternateScreen
+    )?;
+    terminal::disable_raw_mode()?;
+    stdout.flush();
+    Ok(())
 }

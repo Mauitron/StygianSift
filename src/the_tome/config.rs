@@ -31,6 +31,9 @@ pub struct Config {
     pub color_rules: HashMap<MarkerColor, ColorRule>,
     pub shortcut_layers: Vec<ShortcutLayer>,
     pub current_layer: usize,
+    pub draw_simple_borders: bool,
+    pub max_distance: i32,
+    pub dim_step: u8,
 }
 
 impl Config {
@@ -52,6 +55,9 @@ impl Config {
                 .map(|i| ShortcutLayer::new(format!("Layer {}", i)))
                 .collect(),
             current_layer: 0,
+            draw_simple_borders: false,
+            max_distance: 50,
+            dim_step: 3,     
         }
     }
     //////////////////////////////////////////////////KeyBindings//////////////////////////////////////////////////////////////////////
@@ -96,6 +102,13 @@ pub fn default_keybindings() -> HashMap<KeyEvent, Action> {
     keybindings.insert(KeyEvent::new(KeyCode::Char('L'), KeyModifiers::SHIFT), Action::SetLineAmount);
     keybindings.insert(KeyEvent::new(KeyCode::Char('C'), KeyModifiers::SHIFT), Action::CycleItemColor);
     keybindings.insert(KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL), Action::RemoveItemColor);
+    keybindings.insert(KeyEvent::new(KeyCode::Char('<'), KeyModifiers::NONE), Action::DecreaseDimDistance);
+    keybindings.insert(KeyEvent::new(KeyCode::Char('>'), KeyModifiers::NONE), Action::IncreaseDimDistance);
+    
+    // - and = for intensity
+    keybindings.insert(KeyEvent::new(KeyCode::Char('?'), KeyModifiers::NONE), Action::DecreaseDimIntensity);
+    keybindings.insert(KeyEvent::new(KeyCode::Char('+'), KeyModifiers::NONE), Action::IncreaseDimIntensity);
+    keybindings.insert(KeyEvent::new(KeyCode::Char('='),KeyModifiers::NONE), Action::BorderStyle);
 
     //---------------------------------------------Search and Sort-------------------------------------------------------------------\\
     keybindings.insert(KeyEvent::new(KeyCode::Char('S'), KeyModifiers::SHIFT), Action::Search);
@@ -312,6 +325,9 @@ pub fn default_keybindings() -> HashMap<KeyEvent, Action> {
         writeln!(file, "disk_undo_limit = {}", self.disk_undo_limit)?;
         writeln!(file, "allow_disk_undo = {}", self.allow_disk_undo)?;
         writeln!(file, "search_depth_limit = {}", self.search_depth_limit)?;
+        writeln!(file, "draw_simple_borders = {}", self.draw_simple_borders)?;
+        writeln!(file, "max_distance = {}", self.max_distance)?;
+        writeln!(file, "dim_step = {}", self.dim_step)?;
 
         if let Some(keybindings) = &self.keybindings {
             writeln!(file, "keybindings:")?;
@@ -530,6 +546,15 @@ pub fn default_keybindings() -> HashMap<KeyEvent, Action> {
                             "search_depth_limit" => {
                                 config.search_depth_limit = value.parse().unwrap_or(3)
                             }
+                              "draw_simple_borders" => {
+                               config.draw_simple_borders = value.parse().unwrap_or(false)
+                            }
+                              "max_distance" => {
+                            config.max_distance = value.parse().unwrap_or(12)
+                            }
+                              "dim_step" => {
+                            config.dim_step = value.parse().unwrap_or(8)
+                            }
                             _ => {}
                         }
                     }
@@ -545,76 +570,168 @@ pub fn default_keybindings() -> HashMap<KeyEvent, Action> {
         path.push(".maui");
         Ok(path)
     }
-}
-pub fn manage_keybindings(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<()> {
+}pub fn manage_keybindings(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<()> {
+    let mut current_page = 1;
+    let total_pages = 2;
+    
     let (width, height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;
-    let _ = clear_nav();
-    let _ = clear_preview();
-    loop {
-        // execute!(stdout, Clear(ClearType::All))?;
-        execute!(stdout, MoveTo(nav_width / 3, 7))?;
-        writeln!(stdout, "Manage Keybindings\r")?;
-        execute!(stdout, MoveTo(nav_width / 3, 8))?;
-        writeln!(stdout, "==================\r")?;
 
-        if let Some(keybindings) = &app_state.config.keybindings {
-            for (i, (key, action)) in keybindings.iter().enumerate() {
-                if i >= (height - 11) as usize {
-                    execute!(
-                        stdout,
-                        MoveTo(nav_width / 2 + 7, i as u16 - (height - 11) + 8)
-                    )?;
-                    writeln!(
-                        stdout,
-                        "{} : {}\r",
-                        key_event_to_string(key).trim_matches('"').red(),
-                        action.to_string().green()
-                    )?;
-                } else {
-                    execute!(stdout, MoveTo(nav_width / 12, i as u16 + 8))?;
-                    writeln!(
-                        stdout,
-                        "{} : {}\r",
-                        key_event_to_string(key).trim_matches('"').red(),
-                        action.to_string().green()
-                    )?;
-                }
+    loop {
+        let _ = clear_nav();
+        let _ = clear_preview();
+
+        let title = "Manage Keybindings\r";
+        let separator = "=".repeat(title.len());
+        execute!(stdout, MoveTo(nav_width / 3, 3))?;
+        writeln!(stdout, "{}\r", title.bold().green())?;
+        execute!(stdout, MoveTo(nav_width / 3, 4))?;
+        writeln!(stdout, "{}\r", separator.green())?;
+
+        let page1_sections = [
+            (
+                "Navigation",
+                vec![
+                    ("MoveUp", "Up / k"),
+                    ("MoveDown", "Down / j"),
+                    ("MoveLeft", "Left / h"),
+                    ("MoveRight", "Right / l"),
+                    ("GoToTop", "g"),
+                    ("GoToBottom", "e"),
+                    ("Enter", "Enter"),
+                ],
+            ),
+            (
+                "File Operations",
+                vec![
+                    ("Murder", "Shift+D"),
+                    ("Copy", "p"),
+                    ("Paste", "Shift+P"),
+                    ("Duplicate", "d"),
+                    ("MoveItem", "m"),
+                    ("GiveBirthDir", "Ctrl+b"),
+                    ("GiveBirthFile", "Shift+B"),
+                    ("Rename", "r"),
+                    ("RenameWithoutExtension", "Shift+R"),
+                ],
+            ),
+            (
+                "View and Display",
+                vec![
+                    ("TogglePreview", "Space"),
+                    ("SetLineAmount", "Shift+L"),
+                    ("CycleItemColor", "Shift+C"),
+                    ("RemoveItemColor", "Ctrl+c"),
+                    ("IncreaseDimDistance", "Alt+]"),
+                    ("DecreaseDimDistance", "Alt+["),
+                    ("IncreaseDimIntensity", "Alt+="),
+                    ("DecreaseDimIntensity", "Alt+-"),
+                    ("BorderStyle", "="),
+                ],
+            ),
+            (
+                "Search and Filter",
+                vec![
+                    ("Search", "Shift+S"),
+                    ("SearchFiles", "Shift+F"),
+                    ("ToggleCount", "c"),
+                    ("SortCycleForward", "s"),
+                    ("ToggleFilters", "Tab"),
+                ],
+            ),
+        ];
+
+        let page2_sections = [
+            (
+                "Multi-Select",
+                vec![
+                    ("ToggleSelect", "Ctrl+t"),
+                    ("MultiSelectUp", "Shift+K"),
+                    ("MultiSelectDown", "Shift+J"),
+                    ("SelectAll", "Ctrl+a"),
+                ],
+            ),
+            (
+                "System and Tools",
+                vec![
+                    ("TerminalCommand", ":"),
+                    ("Undo", "Ctrl+z"),
+                    ("GitMenu", "]"),
+                    ("ExecuteFile", "|"),
+                    ("OpenInEditor", "."),
+                    ("CastCommandLineSpell", "Alt+Space"),
+                ],
+            ),
+            (
+                "Configuration",
+                vec![
+                    ("Help", "F12"),
+                    ("EditConfig", "~"),
+                    ("ShowShortcuts", "F11"),
+                    ("SetColorRules", "Shift+F2"),
+                ],
+            ),
+            (
+                "Shortcuts",
+                vec![
+                    ("Set Shortcut", "Shift+0-9"),
+                    ("Use Shortcut", "0-9"),
+                    ("Switch Layer", "F1-F10"),
+                    ("RenameLayer", "Shift+F1"),
+                ],
+            ),
+        ];
+
+        let sections = if current_page == 1 { &page1_sections } else { &page2_sections };
+        let mut current_column = 0;
+        let mut current_row = height / 8;
+        let column_width = (width / 2) - 4;
+
+        for (i, (section_title, commands)) in sections.iter().enumerate() {
+            if i > 0 && i % 2 == 0 {
+                current_column += column_width;
+                current_row = height / 8;
             }
-        } else {
-            writeln!(stdout, "No custom keybindings set. Using defaults.\r")?;
+
+            execute!(stdout, MoveTo(current_column + 8, current_row))?;
+            writeln!(stdout, "{}\r", section_title.bold().green())?;
+            current_row += 1;
+
+            for (action, default_key) in commands {
+                execute!(stdout, MoveTo(current_column + 8, current_row))?;
+                if let Some(current_key) = app_state.config.keybindings.as_ref()
+                    .and_then(|kb| kb.iter()
+                        .find(|(_, a)| a.to_string() == *action)
+                        .map(|(k, _)| key_event_to_string(k))) {
+                    writeln!(stdout, "{:<20} {}\r", action.cyan(), current_key.trim_matches('"').red())?;
+                } else {
+                    writeln!(stdout, "{:<20} {}\r", action.cyan(), default_key.red())?;
+                }
+                current_row += 1;
+            }
+            current_row += 1;
         }
 
-        execute!(
-            stdout,
-            MoveTo(preview_width + preview_width / 3, height / 8)
-        )?;
-        writeln!(stdout, "\nEnter your choice (1-3): \r")?;
-        execute!(
-            stdout,
-            MoveTo(preview_width + preview_width / 3, (height / 8) + 3)
-        )?;
-        writeln!(stdout, "{}. Add/Edit Keybinding\r", "1".green())?;
-        execute!(
-            stdout,
-            MoveTo(preview_width + preview_width / 3, (height / 8) + 4)
-        )?;
-        writeln!(stdout, "{}. Remove Keybinding\r", "2".green())?;
-        execute!(
-            stdout,
-            MoveTo(preview_width + preview_width / 3, (height / 8) + 5)
-        )?;
-        writeln!(stdout, "{}. Reset to Default Keybindings\r", "3".green())?;
-        execute!(
-            stdout,
-            MoveTo(preview_width + preview_width / 3, (height / 8) + 6)
-        )?;
-        writeln!(stdout, "{}. Return to Main Menu\r", "Esc".green())?;
+        // Display management options
+        execute!(stdout, MoveTo(preview_width + 3, height - 15))?;
+        writeln!(stdout, "{}\r", "-".repeat((preview_width - 6) as usize).green())?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 14))?;
+        writeln!(stdout, "{}. Add/Edit Keybinding", "1".green())?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 13))?;
+        writeln!(stdout, "{}. Remove Keybinding", "2".green())?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 12))?;
+        writeln!(stdout, "{}. Reset to Default Keybindings", "3".green())?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 11))?;
+        writeln!(stdout, "Current Page: {} of {} (Use → and ← to navigate pages)", current_page, total_pages)?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 10))?;
+        writeln!(stdout, "Press ESC to return...\r")?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 9))?;
+        writeln!(stdout, "{}\r", "-".repeat((preview_width - 6) as usize).green())?;
+
         stdout.flush()?;
+
         if let Event::Key(key) = event::read()? {
-            let _ = clear_nav();
-            let _ = clear_preview();
             match key.code {
                 KeyCode::Char('1') => {
                     let (key_event, action) = read_new_keybinding(stdout, &app_state)?;
@@ -629,7 +746,13 @@ pub fn manage_keybindings(app_state: &mut AppState, stdout: &mut impl Write) -> 
                 KeyCode::Char('3') => {
                     app_state.config.reset_keybindings();
                     app_state.config.save_config()?;
-                    writeln!(stdout, "Keybindings reset to default.\r")?;
+                    interaction_field!("Keybindings reset to default.")?;
+                }
+                KeyCode::Right | KeyCode::Char('l') if current_page < total_pages => {
+                    current_page += 1;
+                }
+                KeyCode::Left | KeyCode::Char('h') if current_page > 1 => {
+                    current_page -= 1;
                 }
                 KeyCode::Esc => break,
                 _ => {}
@@ -638,130 +761,135 @@ pub fn manage_keybindings(app_state: &mut AppState, stdout: &mut impl Write) -> 
     }
     Ok(())
 }
-fn read_new_keybinding(
-    stdout: &mut impl Write,
-    app_state: &AppState,
-) -> io::Result<(KeyEvent, Action)> {
+
+fn read_new_keybinding(stdout: &mut impl Write, app_state: &AppState) -> io::Result<(KeyEvent, Action)> {
     let (width, height) = size()?;
     let nav_width = width / 2;
     let preview_width = width - nav_width - 2;
+    let end_y = height - 4;
+    let start_y = 3;
+
     let _ = clear_nav();
     let _ = clear_preview();
-    execute!(
-        stdout,
-        MoveTo(preview_width + preview_width / 3, (height / 5) + 6)
-    )?;
-    write!(stdout, "Press the key you want to bind: \r")?;
-    stdout.flush()?;
-    let key_event = event::read()?;
-    if let Event::Key(key) = key_event {
-        execute!(
-            stdout,
-            MoveTo(preview_width + preview_width / 3, (height / 5) + 4)
-        )?;
-        writeln!(stdout, "You pressed: {}\r", key_event_to_string(&key))?;
-        execute!(
-            stdout,
-            MoveTo(preview_width + preview_width / 3, (height / 5) + 6)
-        )?;
-        writeln!(stdout, "Select an action to bind to this key:\r")?;
+    execute!(stdout, MoveTo(nav_width / 3, 3))?;
+    writeln!(stdout, "{}\r", "Add New Keybinding\r".bold().green())?;
+    execute!(stdout, MoveTo(nav_width / 3, 4))?;
+    writeln!(stdout, "{}\r", "=================".green())?;
 
-        if let Some(keybindings) = &app_state.config.keybindings {
-            for (i, (_key, action)) in keybindings.iter().enumerate() {
-                if i >= (height - 11) as usize {
-                    execute!(
-                        stdout,
-                        MoveTo(nav_width / 2 + 7, i as u16 - (height - 11) + 8)
-                    )?;
-                    writeln!(stdout, "{}. {}\r", i, action.to_string().green())?;
-                } else {
-                    execute!(stdout, MoveTo(nav_width / 12, i as u16 + 8))?;
-                    writeln!(stdout, "{}. {}\r", i, action.to_string().green())?;
-                }
+   interaction_field!("Press the key you want to bind: \r")?;
+    stdout.flush()?;
+
+    if let Event::Key(key) = event::read()? {
+        execute!(stdout, MoveTo(preview_width + 3, height - 10))?;
+        writeln!(stdout, "Selected Key: {}\r", key_event_to_string(&key).red())?;
+
+        let mut current_column = 0;
+        let mut current_row = start_y + 5;
+        let column_width = (nav_width / 2) - 2;
+
+    let _ = clear_nav();
+    let _ = clear_preview();
+        for (i, action) in Action::iter().enumerate() {
+            if i > 0 && i % ((end_y - start_y - 5) as usize) == 0 {
+                current_column += column_width;
+                current_row = start_y + 5;
             }
+
+            execute!(stdout, MoveTo(current_column + 8, current_row))?;
+            writeln!(stdout, "{}. {}\r", i + 1, action.to_string().cyan())?;
+            current_row += 1;
         }
-        execute!(
-            stdout,
-            MoveTo(preview_width + preview_width / 3, (height / 5) + 6)
-        )?;
-        write!(stdout, "Enter the number of the action: \r")?;
+
+        execute!(stdout, MoveTo(preview_width + 3, height - 8))?;
+        writeln!(stdout, "{}\r", "-".repeat((preview_width - 6) as usize).green())?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 7))?;
+        write!(stdout, "Enter action number: ")?;
         stdout.flush()?;
-        execute!(
-            stdout,
-            MoveTo(preview_width + preview_width / 3, (height / 5) + 8)
-        )?;
+
         let action_index: usize = read_line()?
             .trim()
             .parse()
             .map_err(|_| io::Error::new(io::ErrorKind::InvalidInput, "Invalid action number"))?;
+
         if let Some(action) = Action::iter().nth(action_index - 1) {
             let _ = clear_nav();
             let _ = clear_preview();
             Ok((key, action.clone()))
         } else {
-            Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "Invalid action number",
-            ))
+            Err(io::Error::new(io::ErrorKind::InvalidInput, "Invalid action number"))
         }
     } else {
-        Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "Invalid key event",
-        ))
+        Err(io::Error::new(io::ErrorKind::InvalidInput, "Invalid key event"))
     }
 }
+fn read_keybinding_to_remove(stdout: &mut impl Write, config: &Config) -> io::Result<Option<KeyEvent>> {
+    let (width, height) = size()?;
+    let nav_width = width / 2;
+    let preview_width = width - nav_width - 2;
+    
+    let _ = clear_nav();
+    let _ = clear_preview();
 
-fn read_keybinding_to_remove(
-    stdout: &mut impl Write,
-    config: &Config,
-) -> io::Result<Option<KeyEvent>> {
+    let title = "Remove Keybinding\r";
+    let separator = "=".repeat(title.len());
+    execute!(stdout, MoveTo(nav_width / 3, 3))?;
+    writeln!(stdout, "{}\r", title.bold().green())?;
+    execute!(stdout, MoveTo(nav_width / 3, 4))?;
+    writeln!(stdout, "{}\r", separator.green())?;
+
     if let Some(keybindings) = config.get_keybindings() {
-        writeln!(stdout, "Current keybindings:")?;
-        for (key, action) in keybindings {
-            writeln!(stdout, "{} : {:?}", key_event_to_string(key), action)?;
+        for (i, (key, action)) in keybindings.iter().enumerate() {
+            let y_pos = if i >= (height - 11) as usize {
+                execute!(stdout, MoveTo(nav_width / 2 + 7, i as u16 - (height - 11) + 8))?;
+                i as u16 - (height - 11) + 8
+            } else {
+                execute!(stdout, MoveTo(nav_width / 12, i as u16 + 8))?;
+                i as u16 + 8
+            };
+            writeln!(
+                stdout,
+                "{:<20} {}\r",
+                key_event_to_string(key).trim_matches('"').red(),
+                action.to_string().cyan()
+            )?;
         }
-    } else {
-        writeln!(stdout, "No custom keybindings set. Using defaults.")?;
-        return Ok(None);
-    }
 
-    writeln!(
-        stdout,
-        "Press the key of the binding you want to remove (or Esc to cancel): "
-    )?;
-    stdout.flush()?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 12))?;
+        writeln!(stdout, "{}\r", "-".repeat((preview_width - 6) as usize).green())?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 11))?;
+        writeln!(stdout, "Press the key to remove or ESC to cancel")?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 9))?;
+        writeln!(stdout, "{}\r", "-".repeat((preview_width - 6) as usize).green())?;
 
-    loop {
-        if let Ok(Event::Key(key)) = event::read() {
-            match key.code {
-                KeyCode::Esc => {
-                    writeln!(stdout, "Cancelled keybinding removal.")?;
-                    return Ok(None);
-                }
-                _ => {
-                    if config
-                        .get_keybindings()
-                        .map_or(false, |kb| kb.contains_key(&key))
-                    {
-                        writeln!(
-                            stdout,
-                            "Removing keybinding for: {}",
-                            key_event_to_string(&key)
-                        )?;
-                        return Ok(Some(key));
-                    } else {
-                        writeln!(
-                            stdout,
-                            "No keybinding found for: {}. Try again or press Esc to cancel.",
-                            key_event_to_string(&key)
-                        )?;
+        stdout.flush()?;
+
+        loop {
+            if let Ok(Event::Key(key)) = event::read() {
+                match key.code {
+                    KeyCode::Esc => {
+                        interaction_field!("Cancelled keybinding removal.")?;
+                        return Ok(None);
+                    }
+                    _ => {
+                        if config.get_keybindings().map_or(false, |kb| kb.contains_key(&key)) {
+                            interaction_field!("Removing keybinding for: {}", key_event_to_string(&key))?;
+                            return Ok(Some(key));
+                        } else {
+                            interaction_field!(
+                                "No keybinding found for: {}. Try again or press ESC to cancel.",
+                                key_event_to_string(&key)
+                            )?;
+                        }
                     }
                 }
             }
         }
+    } else {
+        interaction_field!("No custom keybindings set. Using defaults.")?;
+        Ok(None)
     }
 }
+
 ////////////////////////////////////////////////////////////////Shortcuts///////////////////////////////////////////////////////////////////////////////
 
 

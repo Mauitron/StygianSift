@@ -30,6 +30,7 @@ pub mod config;
 pub mod file_entry;
 pub mod main_nav_loop;
 pub mod marvelous_actions;
+pub mod mouse;
 pub mod nav_functions;
 pub mod system_functions;
 pub mod the_search;
@@ -41,6 +42,8 @@ pub mod ui_components;
 pub use crossterm::{
     cursor::{Hide, MoveTo, Show},
     event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
+    event::{DisableMouseCapture, EnableMouseCapture},
+    event::{MouseButton, MouseEvent, MouseEventKind},
     style::{
         Attribute, Color, ResetColor, SetAttribute, SetBackgroundColor, SetForegroundColor,
         StyledContent, Stylize,
@@ -55,6 +58,15 @@ pub use crossterm::{
 pub use rayon::prelude::*;
 
 /////////////////////////////////////////!DEPENDENCIES!//////////////////////////////////////////////
+pub use self::{
+    browser_commands::*, config::*, file_entry::*, main_nav_loop::*, marvelous_actions::*,
+    mouse::*, nav_functions::*, system_functions::*, the_search::*, tome_state::*,
+    ui_components::*,
+};
+#[cfg(unix)]
+use std::os::unix::fs::MetadataExt;
+#[cfg(windows)]
+use std::os::windows::fs::MetadataExt;
 pub use std::{
     cmp::Ordering,
     collections::{BTreeMap, HashMap, HashSet, VecDeque},
@@ -62,7 +74,6 @@ pub use std::{
     fmt::{Arguments, Display, Formatter, Result as OtherResult},
     fs::{self, File, OpenOptions},
     io::{self, stdout, BufRead, Read, Write},
-    os::unix::fs::MetadataExt,
     path::{Path, PathBuf},
     process::{Child, Command, Stdio},
     result::Result,
@@ -70,11 +81,6 @@ pub use std::{
     str::FromStr,
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
     usize,
-};
-
-pub use self::{
-    browser_commands::*, config::*, file_entry::*, marvelous_actions::*, nav_functions::*,
-    system_functions::*, the_search::*, tome_state::*, ui_components::*,
 };
 
 pub const INPUT_TIMEOUT: Duration = Duration::from_secs(30);

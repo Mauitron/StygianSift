@@ -205,8 +205,9 @@ pub fn edit_config(
     current_dir: &Path,
 ) -> io::Result<()> {
     let config_path = Config::get_config_path()?;
-    let (width, _height) = size()?;
+    let (width, height) = size()?;
     let nav_width = width / 2;
+    let preview_width = width - nav_width - 2;
 
     if !config_path.exists() {
         create_default_config(&config_path, app_state)?;
@@ -215,26 +216,30 @@ pub fn edit_config(
     let mut selected_item = 0;
     let menu_items = vec![
         "Set Current Directory as Home",
-        // "Lines Shown",
         "Default Sort",
         "Remap Keys",
         "Set Text Editor",
         "Set Search Depth Limit",
+        "Set Dimming Settings",
         "Undo Settings",
         "Return to Browser",
     ];
 
-    let _ = clear_nav();
-    let _ = clear_preview();
-
     loop {
-        execute!(stdout, MoveTo(nav_width / 3, 7))?;
-        writeln!(stdout, "Edit Configuration\r")?;
-        execute!(stdout, MoveTo(nav_width / 3, 8))?;
-        writeln!(stdout, "===================\r")?;
+        let _ = clear_nav();
+        let _ = clear_preview();
 
-        // Display current home folder
-        execute!(stdout, MoveTo(nav_width / 8, 10))?;
+        let title = "Edit Configuration\r";
+        let separator = "=".repeat(title.len());
+        execute!(stdout, MoveTo(nav_width / 3, 3))?;
+        writeln!(stdout, "{}\r", title.bold().green())?;
+        execute!(stdout, MoveTo(nav_width / 3, 4))?;
+        writeln!(stdout, "{}\r", separator.green())?;
+
+        execute!(stdout, MoveTo(nav_width / 8, 6))?;
+        writeln!(stdout, "{}", "Current Settings:".yellow().bold())?;
+
+        execute!(stdout, MoveTo(nav_width / 8, 8))?;
         writeln!(
             stdout,
             "Home Folder: {}\r",
@@ -248,7 +253,7 @@ pub fn edit_config(
         )?;
 
         for (i, item) in menu_items.iter().enumerate() {
-            execute!(stdout, MoveTo(nav_width / 8, 12 + i as u16))?;
+            execute!(stdout, MoveTo(nav_width / 8, 10 + i as u16))?;
 
             if i == selected_item {
                 write!(stdout, "{} ", "→".green())?;
@@ -257,24 +262,37 @@ pub fn edit_config(
             }
 
             match i {
-                1 => writeln!(stdout, "{}\r", item)?,
-                // 1 => writeln!(stdout, "{}: {}\r", item, app_state.config.lines_shown)?,
-                2 => writeln!(stdout, "{}: {:?}\r", item, app_state.config.default_sort)?,
-                3 => writeln!(stdout, "{}\r", item)?,
+                0 => writeln!(stdout, "{}\r", item.cyan())?,
+                1 => writeln!(
+                    stdout,
+                    "{} (current: {})\r",
+                    item.cyan(),
+                    app_state.config.default_sort.to_string().green()
+                )?,
+                2 => writeln!(stdout, "{}\r", item.cyan())?,
+                3 => writeln!(
+                    stdout,
+                    "{} (current: {})\r",
+                    item.cyan(),
+                    app_state.config.text_editor.clone().green()
+                )?,
                 4 => writeln!(
                     stdout,
                     "{} (current: {})\r",
-                    item, app_state.config.text_editor
+                    item.cyan(),
+                    app_state.search_depth_limit.to_string().green()
                 )?,
                 5 => writeln!(
                     stdout,
-                    "{} (current: {})\r",
-                    item, app_state.search_depth_limit
+                    "{} (distance: {}, intensity: {})\r",
+                    item.cyan(),
+                    app_state.config.max_distance.to_string().green(),
+                    app_state.config.dim_step.to_string().green()
                 )?,
                 6 => writeln!(
                     stdout,
                     "{} (RAM: {} MB, Disk: {} GB, Storage: {})\r",
-                    item,
+                    item.cyan(),
                     (app_state.undo_manager.ram_limit / 1_048_576)
                         .to_string()
                         .green(),
@@ -287,15 +305,26 @@ pub fn edit_config(
                         "Disabled".red()
                     }
                 )?,
-                _ => writeln!(stdout, "{}\r", item)?,
+                _ => writeln!(stdout, "{}\r", item.cyan())?,
             }
         }
 
-        execute!(
+        execute!(stdout, MoveTo(preview_width + 3, height - 12))?;
+        writeln!(
             stdout,
-            MoveTo(nav_width / 8, 12 + menu_items.len() as u16 + 1)
+            "{}\r",
+            "-".repeat((preview_width - 6) as usize).green()
         )?;
-        writeln!(stdout, "Use ↑↓ to navigate, Enter to select\r")?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 11))?;
+        writeln!(stdout, "Use ↑↓ (or k/j) to navigate")?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 10))?;
+        writeln!(stdout, "Press Enter to select, ESC to return")?;
+        execute!(stdout, MoveTo(preview_width + 3, height - 9))?;
+        writeln!(
+            stdout,
+            "{}\r",
+            "-".repeat((preview_width - 6) as usize).green()
+        )?;
 
         stdout.flush()?;
 
@@ -318,88 +347,56 @@ pub fn edit_config(
                                 current_dir.to_string_lossy()
                             )?;
                         }
-                        1 => match read_new_lines(stdout) {
-                            Ok(new_lines) => {
-                                app_state.config.lines_shown = new_lines;
-                                app_state.save_config()?;
-                            }
-                            Err(e) => writeln!(stdout, "Error: {}\r", e)?,
-                        },
-                        2 => match read_new_sort(stdout) {
-                            Ok(new_sort) => {
+                        1 => {
+                            if let Ok(new_sort) = read_new_sort(stdout) {
                                 app_state.config.default_sort = new_sort;
-                                app_state.save_config()?;
+                                app_state.config.save_config()?;
                             }
-                            Err(e) => writeln!(stdout, "Error: {}\r", e)?,
-                        },
+                        }
+                        2 => {
+                            if let Some(_) = &app_state.config.keybindings {
+                                manage_keybindings(app_state, stdout)?;
+                            }
+                        }
                         3 => {
-                            if let Some(_key_bindings) = &app_state.config.keybindings {
-                                let _ = manage_keybindings(app_state, stdout);
+                            let _ = interaction_field!("Enter a new text editor command:")?;
+                            if let Ok(new_editor) = read_line() {
+                                if !new_editor.trim().is_empty() {
+                                    app_state.config.text_editor = new_editor;
+                                    app_state.config.save_config()?;
+                                    interaction_field!("Text editor updated")?;
+                                }
                             }
                         }
                         4 => {
-                            manage_shortcuts(app_state, stdout)?;
-                            let _ = clear_nav();
-                            let _ = clear_preview();
+                            let _ = interaction_field!("Enter search depth (0 for Unlimited):")?;
+                            if let Ok(new_depth) = read_line()?.trim().parse() {
+                                app_state.search_depth_limit = new_depth;
+                                app_state.config.search_depth_limit = new_depth;
+                                app_state.config.save_config()?;
+                                interaction_field!("Search depth updated to {}", new_depth)?;
+                            } else {
+                                interaction_field!("Invalid input. Search depth not changed")?;
+                            }
                         }
                         5 => {
-                            let _ = clear_nav();
-                            execute!(stdout, MoveTo(nav_width / 8, 12))?;
-                            let _ = clear_interaction_field();
-                            let _ = interaction_field!("Enter a new text editor command");
-                            stdout.flush()?;
-                            execute!(stdout, MoveTo(nav_width / 8, 13))?;
-                            let new_editor = read_line()?;
-                            if !new_editor.is_empty() {
-                                app_state.config.text_editor = new_editor;
-                                app_state.config.save_config()?;
-                                execute!(stdout, MoveTo(nav_width / 8, 14))?;
-                                let _ = clear_interaction_field();
-                                let _ = interaction_field!("Text Editor Updated");
-                            }
-                        }
-                        6 => {
-                            let _ = clear_nav();
-                            execute!(stdout, MoveTo(nav_width / 8, 12))?;
-                            let _ = clear_interaction_field();
-                            let _ = interaction_field!("Enter search depth (0 Unlimited)");
-                            stdout.flush()?;
-                            execute!(stdout, MoveTo(nav_width / 8, 13))?;
-                            let new_depth = read_line()?;
-                            if let Ok(depth) = new_depth.trim().parse() {
-                                app_state.search_depth_limit = depth;
-                                app_state.config.search_depth_limit = depth;
-                                app_state.config.save_config()?;
-                                let _ = clear_interaction_field();
-                                execute!(stdout, MoveTo(nav_width / 8, 14))?;
-                                let _ = clear_interaction_field();
-                                let _ = interaction_field!("search depth updated {}", depth);
-                            } else {
-                                let _ = clear_interaction_field();
-                                execute!(stdout, MoveTo(nav_width / 8, 14))?;
-                                let _ = clear_interaction_field();
-                                let _ =
-                                    interaction_field!("Invalid input. Search depth not changed");
-                            }
-                        }
-                        7 => {
                             configure_undo_settings(app_state, stdout)?;
-                            let _ = clear_nav();
                         }
-                        8 | _ => break,
+                        6 | _ => break,
                     }
                     let _ = clear_nav();
+                    let _ = clear_preview();
                 }
                 KeyCode::Esc => break,
                 _ => {}
             }
         }
     }
+
     let _ = clear_nav();
     let _ = clear_preview();
     Ok(())
 }
-
 fn configure_undo_settings(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<()> {
     let (width, height) = size()?;
     let nav_width = width / 2;
@@ -500,7 +497,7 @@ fn configure_undo_settings(app_state: &mut AppState, stdout: &mut impl Write) ->
                             interaction_field!("Enter new disk limit in GB: ")?;
                             if let Ok(input) = read_line() {
                                 if let Ok(limit) = input.trim().parse::<u64>() {
-                                    app_state.undo_manager.disk_limit = limit * 1_073_741_824; // Gigs to bytes
+                                    app_state.undo_manager.disk_limit = limit * 1_073_741_824; // Gigs to bibs
                                     app_state.config.disk_undo_limit =
                                         app_state.undo_manager.disk_limit;
                                     app_state.config.save_config()?;
@@ -908,7 +905,6 @@ pub fn parse_key_event(s: &str) -> KeyEvent {
         "Enter" => KeyCode::Enter,
         "Esc" => KeyCode::Esc,
         "F1" => KeyCode::F(1),
-        // KeyCode::Char(' ') => "[SPACE]".to_string(),
         " " => KeyCode::Char(' '),
         c if c.len() == 1 => KeyCode::Char(c.chars().next().unwrap()),
         _ => KeyCode::Null,
@@ -975,6 +971,7 @@ pub fn murder_files(
     stdout: &mut impl Write,
     entries: &[FileEntry],
     selected_index: usize,
+    skip_confirm: bool,
 ) -> io::Result<()> {
     let files_to_delete = if let Some(selected) = &app_state.multiple_selected_files {
         selected.iter().cloned().collect::<Vec<_>>()
@@ -999,52 +996,54 @@ pub fn murder_files(
     }
 
     if allowed_files.is_empty() {
-        // let _ = clear_interaction_field();
-        // interaction_field!("No files are allowed to be deleted.\r")?;
         return Ok(());
     }
 
-    let _ = clear_interaction_field();
-    interaction_field!(
-        "Are you sure you want to delete {} file(s)? (y/n)\r",
-        allowed_files.len()
-    )?;
-    stdout.flush()?;
+    if !skip_confirm {
+        let _ = clear_interaction_field();
+        interaction_field!(
+            "Are you sure you want to delete {} file(s)? (y/n)\r",
+            allowed_files.len()
+        )?;
+        stdout.flush()?;
 
-    if let Event::Key(key) = event::read()? {
-        if key.code == KeyCode::Char('y') {
-            for path in &allowed_files {
-                let (storage, size) = copy_to_storage(path)?;
-                app_state.undo_manager.add_tome_entry(UndoEntry {
-                    operation: Operation::Delete {
-                        timestamp: SystemTime::now(),
-                    },
-                    storage,
-                    original_path: path.to_path_buf(),
-                    size,
-                })?;
-
-                if path.is_dir() {
-                    fs::remove_dir_all(path)?;
-                } else {
-                    fs::remove_file(path)?;
-                }
+        if let Event::Key(key) = event::read()? {
+            if key.code != KeyCode::Char('y') {
+                let _ = clear_interaction_field();
+                interaction_field!("Deletion cancelled.\r")?;
+                return Ok(());
             }
-            let _ = clear_interaction_field();
-            interaction_field!("{} file(s) deleted successfully.\r", allowed_files.len())?;
-            app_state.clear_selection();
-        } else {
-            let _ = clear_interaction_field();
-            interaction_field!("Deletion cancelled.\r")?;
         }
     }
+
+    for path in &allowed_files {
+        let (storage, size) = copy_to_storage(path)?;
+        app_state.undo_manager.add_tome_entry(UndoEntry {
+            operation: Operation::Delete {
+                timestamp: SystemTime::now(),
+            },
+            storage,
+            original_path: path.to_path_buf(),
+            size,
+        })?;
+
+        if path.is_dir() {
+            fs::remove_dir_all(path)?;
+        } else {
+            fs::remove_file(path)?;
+        }
+    }
+
+    let _ = clear_interaction_field();
+    interaction_field!("{} file(s) deleted successfully.\r", allowed_files.len())?;
+    app_state.clear_selection();
+
     Ok(())
 }
 
 use std::fmt::write;
 #[cfg(windows)]
 use std::os::windows::fs::MetadataExt;
-
 pub fn copy_to_temp(path: &Path, temp_dir: &Path) -> io::Result<(PathBuf, u64)> {
     // Generate unique timestamp-based filename
     let timestamp = SystemTime::now()
@@ -1127,7 +1126,7 @@ pub fn copy_to_temp(path: &Path, temp_dir: &Path) -> io::Result<(PathBuf, u64)> 
             if let Ok(metadata) = path.metadata() {
                 if metadata.file_attributes() & 0x2 != 0 {
                     return Err(io::Error::new(
-                        ErrorKind::PermissionDenied,
+                        std::io::ErrorKind::PermissionDenied,
                         "Cannot copy hidden file",
                     ));
                 }
@@ -1285,8 +1284,8 @@ pub fn execute_terminal_command(
     let max_lines = height - 15;
     let mut terminal_output: VecDeque<(String, bool)> = VecDeque::new();
     let mut autocomplete = Autocomplete::new();
-    let dimming_config = DimmingConfig::new(5); // visible suggestions. maybe more is better?
-                                                // let _ = clear_preview();
+    let dimming_config = DimmingConfig::new(5, &app_state.config); // visible suggestions. maybe more is better?
+                                                                   // let _ = clear_preview();
     let _ = clear_interaction_field();
     queue!(stdout, MoveTo(preview_width + 3, height - 13))?;
     write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;

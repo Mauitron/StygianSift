@@ -14,49 +14,36 @@
  * to the original project.
  */
 
+use main_nav_loop::BrowseResult;
+
 use super::*;
 pub struct ScrollState {
     pub offset: usize,
-    pub target_offset: usize,
 }
 
 impl ScrollState {
     pub fn new() -> Self {
-        ScrollState {
-            offset: 0,
-            target_offset: 0,
-        }
-    }
-
-    pub fn update(&mut self) {
-        self.offset = self.target_offset;
+        ScrollState { offset: 0 }
     }
 }
 pub struct NavigationInfo {
     pub dir_name: String,
     pub index: usize,
 }
-
+#[derive(PartialEq, Eq, Debug)]
+pub enum InputMode {
+    Keyboard,
+    Mouse,
+}
 pub struct AppState {
     pub input: Vec<u8>,
-    pub loops: u64,
     pub lines: usize,
-    pub time_iter: u32,
-    pub avg_time: Duration,
-    pub max_time: Duration,
-    pub min_time: Duration,
-    pub sum_time: Duration,
-    pub last_count: usize,
-    pub last_time_stop: Duration,
-    pub no_match_len: usize,
-    pub is_windows: bool,
-    pub file_path: PathBuf,
     pub show_count: bool,
     pub preview_active: bool,
     pub current_file_selected: bool,
     pub multiple_selected_files: Option<HashSet<PathBuf>>,
-    pub selected_index: usize,          // was f32
-    pub selection_amont: Option<usize>, // was Option<f32>
+    pub selected_index: usize, // was f32 for trying smooth transitions between entries. might go back.
+    pub selection_amont: Option<usize>, // was Option<f32>. for the same reason.
     pub clipboard: Option<Vec<PathBuf>>,
     pub page_state: PageState,
     pub config: Config,
@@ -69,7 +56,6 @@ pub struct AppState {
     pub nav_stack: Vec<NavigationInfo>,
     pub search_depth_limit: usize,
     pub colored_items: HashMap<PathBuf, MarkerColor>,
-    pub colored_rules: HashMap<MarkerColor, HashSet<PathBuf>>,
     pub git_menu: Option<GitMenu>,
     pub is_git_repo: bool,
     pub git_info: GitInfo,
@@ -78,6 +64,8 @@ pub struct AppState {
     pub is_search: bool,
     pub changing_color: bool,
     pub search_filters: SearchFilters,
+    pub mouse_state: MouseState,
+    pub input_mode: InputMode,
 }
 
 impl AppState {
@@ -94,19 +82,8 @@ impl AppState {
             lines: config.lines_shown,
             input: Vec::new(),
             //not in use ----------------------------|
-            loops: 0,
-            time_iter: 1,
-            avg_time: Duration::ZERO,
-            max_time: Duration::ZERO,
-            min_time: Duration::ZERO,
-            sum_time: Duration::ZERO,
-            last_count: 0,
-            last_time_stop: Duration::ZERO,
-            no_match_len: 0,
             show_count: false,
             //not in use----------------------------|
-            is_windows: cfg!(target_os = "windows"),
-            file_path: PathBuf::new(),
             last_browsed_dir: current_dir.clone(),
             preview_active: false,
             selection_amont: None,
@@ -126,7 +103,6 @@ impl AppState {
             search_depth_limit: config.search_depth_limit,
             nav_stack: Vec::new(),
             colored_items: HashMap::new(),
-            colored_rules: config.colored_items.clone(),
             current_dir,
             git_menu: None,
             config,
@@ -138,9 +114,22 @@ impl AppState {
             is_search: false,
             changing_color: false,
             search_filters: SearchFilters::new(),
+            mouse_state: MouseState::new(),
+            input_mode: InputMode::Keyboard,
         })
     }
 
+    fn handle_entry_activation(&mut self, entry: &FileEntry) -> io::Result<Option<BrowseResult>> {
+        if entry.file_type == FileType::Directory {
+            self.current_dir = entry.path.clone();
+            self.selected_index = 0;
+            self.scroll_state.offset = 0;
+            Ok(None)
+        } else {
+            self.execute_file(&mut stdout(), &entry.path)?;
+            Ok(None)
+        }
+    }
     pub fn display_current_layer(&self, stdout: &mut impl Write) -> io::Result<()> {
         let (width, height) = size()?;
         let nav_width = width / 2;
@@ -380,9 +369,6 @@ impl AppState {
         })
     }
 
-    fn is_git_repo(path: &Path) -> bool {
-        path.join(".git").is_dir()
-    }
     pub fn update_current_dir(&mut self, new_dir: PathBuf) {
         self.current_dir = new_dir;
         self.is_git_repo = is_git_repository(&self.current_dir);

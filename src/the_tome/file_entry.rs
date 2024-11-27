@@ -64,7 +64,7 @@ impl FileEntry {
             Self::determine_file_type(&path)
         };
 
-        let (admin_required, read_only) = Self::check_permissions(&path, &metadata);
+        let (admin_required, read_only) = Self::check_permissions(&metadata);
 
         Ok(Self {
             path,
@@ -93,33 +93,23 @@ impl FileEntry {
             _ => FileType::Unknown,
         }
     }
-
     #[cfg(unix)]
-    fn check_permissions(path: &Path, metadata: &fs::Metadata) -> (bool, bool) {
-        let _ = path;
+    pub fn check_permissions(metadata: &fs::Metadata) -> (bool, bool) {
         use std::os::unix::fs::MetadataExt;
         let mode = metadata.mode();
         let uid = metadata.uid();
-
         let admin_required = if uid == 0 { false } else { (mode & 0o200) == 0 };
-
-        (admin_required, metadata.permissions().readonly())
+        (admin_required, (mode & 0o200) == 0)
     }
 
     #[cfg(windows)]
-    fn check_permissions(path: &Path, metadata: &fs::Metadata) -> (bool, bool) {
+    pub fn check_permissions(metadata: &fs::Metadata) -> (bool, bool) {
         use std::os::windows::fs::MetadataExt;
-
-        if let Ok(attrs) = metadata.file_attributes() {
-            let readonly = (attrs & 0x1) != 0;
-            let system = (attrs & 0x4) != 0;
-            let hidden = (attrs & 0x2) != 0;
-
-            let admin_required = system || hidden;
-
-            (admin_required, readonly)
-        } else {
-            (false, metadata.permissions().readonly())
-        }
+        let attrs = metadata.file_attributes();
+        let readonly = (attrs & 0x1) != 0;
+        let system = (attrs & 0x4) != 0;
+        let hidden = (attrs & 0x2) != 0;
+        let admin_required = system || hidden;
+        (admin_required, readonly)
     }
 }

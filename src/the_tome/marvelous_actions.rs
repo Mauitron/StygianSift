@@ -18,6 +18,11 @@ use super::*;
 ///////////////////////////////////////////////////////Action///////////////////////////////////////////////////////////////////////////
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Action {
+    IncreaseDimDistance,
+    DecreaseDimDistance,
+    IncreaseDimIntensity,
+    DecreaseDimIntensity,
+    BorderStyle,
     CastCommandLineSpell,
     ToggleFilters,
     GoToTop,
@@ -96,7 +101,12 @@ pub enum Action {
 
 impl Action {
     pub fn iter() -> Iter<'static, Action> {
-        static ACTIONS: [Action; 71] = [
+        static ACTIONS: [Action; 76] = [
+            Action::IncreaseDimDistance,
+            Action::DecreaseDimDistance,
+            Action::IncreaseDimIntensity,
+            Action::DecreaseDimIntensity,
+            Action::BorderStyle,
             Action::CastCommandLineSpell,
             Action::ToggleFilters,
             Action::GoToTop,
@@ -181,6 +191,11 @@ impl FromStr for Action {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "IncreaseDimDistance" => Ok(Action::IncreaseDimDistance),
+            "DecreaseDimDistance" => Ok(Action::DecreaseDimDistance),
+            "IncreaseDimIntensity" => Ok(Action::IncreaseDimIntensity),
+            "DecreaseDimIntensity" => Ok(Action::DecreaseDimIntensity),
+            "BorderStyle" => Ok(Action::BorderStyle),
             "CastCommandLineSpell" => Ok(Action::CastCommandLineSpell),
             "ToggleFilters" => Ok(Action::ToggleFilters),
             "GoToTop" => Ok(Action::GoToTop),
@@ -290,6 +305,11 @@ impl FromStr for Action {
 impl Display for Action {
     fn fmt(&self, f: &mut Formatter<'_>) -> OtherResult {
         let s = match self {
+            Action::IncreaseDimDistance => "IncreaseDimDistance",
+            Action::DecreaseDimDistance => "DecreaseDimDistance",
+            Action::IncreaseDimIntensity => "IncreaseDimIntensity",
+            Action::DecreaseDimIntensity => "DecreaseDimIntensity",
+            Action::BorderStyle => "BorderStyle",
             Action::CastCommandLineSpell => "CastCommandLineSpell",
             Action::ToggleFilters => "ToggleFilters",
             Action::GoToTop => "GoToTop",

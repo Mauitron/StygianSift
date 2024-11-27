@@ -251,7 +251,7 @@ pub fn handle_quit(app_state: &mut AppState, stdout: &mut impl Write) -> io::Res
     if app_state.is_moving {
         let (width, height) = size()?;
         let nav_width = width / 2;
-        let preview_width = width - nav_width - 2;
+        let preview_width = width - nav_width;
         app_state.cancel_move();
 
         let _ = clear_interaction_field();
@@ -260,13 +260,13 @@ pub fn handle_quit(app_state: &mut AppState, stdout: &mut impl Write) -> io::Res
     } else {
         let (width, height) = size()?;
         let nav_width = width / 2;
-        let preview_width = width - nav_width - 2;
-        queue!(stdout, MoveTo(preview_width + 3, height - 12))?;
-        write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
+        let preview_width = width - nav_width;
+        queue!(stdout, MoveTo(preview_width, height - 12))?;
+        write!(stdout, "{}", "-".repeat((preview_width - 6).into()).green())?;
         queue!(stdout, MoveTo((preview_width * 11) / 8, height - 10),)?;
         write!(stdout, "Press {} you want to quit", "Y".red())?;
-        queue!(stdout, MoveTo(preview_width + 3, height - 8))?;
-        write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
+        queue!(stdout, MoveTo(preview_width, height - 8))?;
+        write!(stdout, "{}", "-".repeat((preview_width - 6).into()).green())?;
 
         stdout.flush()?;
 
@@ -276,7 +276,9 @@ pub fn handle_quit(app_state: &mut AppState, stdout: &mut impl Write) -> io::Res
 
         match input.to_ascii_lowercase() {
             'y' => {
-                cleanup_terminal()?;
+                execute!(stdout, DisableMouseCapture)?;
+                system_functions::cleanup_terminal()?;
+                stdout.flush()?;
                 Ok(true)
             }
             _ => {
@@ -391,14 +393,13 @@ pub fn handle_duplicate(
 
 pub fn handle_move_item(
     app_state: &mut AppState,
-    stdout: &mut impl Write,
     entries: &[FileEntry],
     selected_index: usize,
     current_dir: &PathBuf,
 ) -> io::Result<()> {
-    let (width, height) = size()?;
+    let (width, _height) = size()?;
     let nav_width = width / 2;
-    let preview_width = width - nav_width - 2;
+    let _preview_width = width - nav_width - 2;
     let _ = clear_interaction_field();
     if let Some(entry) = entries.get(selected_index as usize) {
         if app_state.is_moving {
@@ -683,7 +684,7 @@ pub fn handle_move_updown(
     let _ = clear_interaction_field();
     let (width, height) = size()?;
     let nav_width = width / 2;
-    let preview_width = width - nav_width - 2;
+    let preview_width = width - nav_width;
     let direction = if matches!(action, Action::MoveUp) {
         if *selected_index < 1 {
             0
@@ -711,35 +712,35 @@ pub fn handle_move_updown(
     }
 
     if !is_search && !app_state.preview_active && !app_state.select_mode {
-        queue!(stdout(), MoveTo(preview_width + 3, height - 12))?;
+        queue!(stdout(), MoveTo(preview_width, height - 12))?;
         write!(
             stdout(),
             "{}",
-            " ".green().to_string().repeat((preview_width - 4).into())
+            " ".green().to_string().repeat((preview_width - 6).into())
         )?;
-        queue!(stdout(), MoveTo(preview_width + 3, height - 11))?;
+        queue!(stdout(), MoveTo(preview_width, height - 11))?;
         write!(
             stdout(),
             "{}",
-            " ".green().to_string().repeat((preview_width - 4).into())
+            " ".green().to_string().repeat((preview_width - 6).into())
         )?;
-        queue!(stdout(), MoveTo(preview_width + 3, height - 10))?;
+        queue!(stdout(), MoveTo(preview_width, height - 10))?;
         write!(
             stdout(),
             "{}",
-            " ".green().to_string().repeat((preview_width - 4).into())
+            " ".green().to_string().repeat((preview_width - 6).into())
         )?;
-        queue!(stdout(), MoveTo(preview_width + 3, height - 9))?;
+        queue!(stdout(), MoveTo(preview_width, height - 9))?;
         write!(
             stdout(),
             "{}",
-            " ".green().to_string().repeat((preview_width - 4).into())
+            " ".green().to_string().repeat((preview_width - 6).into())
         )?;
-        queue!(stdout(), MoveTo(preview_width + 3, height - 8))?;
+        queue!(stdout(), MoveTo(preview_width, height - 8))?;
         write!(
             stdout(),
             "{}",
-            " ".green().to_string().repeat((preview_width - 4).into())
+            " ".green().to_string().repeat((preview_width - 6).into())
         )?;
     }
 
@@ -820,4 +821,41 @@ fn toggle_filter(app_state: &mut AppState, color: MarkerColor) -> bool {
     } else {
         false
     }
+}
+// didn't work consistantly with just "border.config.draw_simple_borders = !border.config.draw_simple_borders"
+pub fn handle_change_border(border: &mut AppState) {
+    let mut stdout = stdout();
+    if border.config.draw_simple_borders {
+        let _ = execute!(stdout, Clear(ClearType::All));
+        border.config.draw_simple_borders = !border.config.draw_simple_borders;
+        let _ = draw_initial_border(&mut stdout, &border.page_state);
+    } else {
+        let _ = execute!(stdout, Clear(ClearType::All));
+        border.config.draw_simple_borders = !border.config.draw_simple_borders;
+        let _ = draw_simple_border(&mut stdout, &border.page_state);
+    }
+    let _ = border.config.save_config();
+}
+pub fn handle_dim_controls(app_state: &mut AppState, action: Action) -> io::Result<()> {
+    match action {
+        Action::IncreaseDimDistance => {
+            app_state.config.max_distance = (app_state.config.max_distance + 1).min(100);
+            interaction_field!("Dim distance: {}", app_state.config.max_distance)?;
+        }
+        Action::DecreaseDimDistance => {
+            app_state.config.max_distance = (app_state.config.max_distance - 1).max(1);
+            interaction_field!("Dim distance: {}", app_state.config.max_distance)?;
+        }
+        Action::IncreaseDimIntensity => {
+            app_state.config.dim_step = (app_state.config.dim_step + 1).min(100);
+            interaction_field!("Dim intensity: {}", app_state.config.dim_step)?;
+        }
+        Action::DecreaseDimIntensity => {
+            app_state.config.dim_step = (app_state.config.dim_step - 1).max(1);
+            interaction_field!("Dim intensity: {}", app_state.config.dim_step)?;
+        }
+        _ => {}
+    }
+    app_state.config.save_config()?;
+    Ok(())
 }
