@@ -168,7 +168,7 @@ StygianSift implements a sophisticated undo system that would make time traveler
 - Handles multiple file operations
 - 
 ## ✨ Multi-select Because Why Stop at One
-![image](https://github.com/user-attachments/assets/46360bd7-e027-4743-b783-3792ad5b9ff2)
+![output_optimized](https://github.com/user-attachments/assets/7e1ce4da-0105-40b4-b24b-6f5601d182f5)
 You want to impress that girl over there? Show here how massive your file operations are!
 Why settle for manipulating just one file when you can wrangle a whole herd? The multi-select
 feature makes file operations a whole lot more convenient:
