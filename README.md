@@ -132,6 +132,9 @@ shape-shifting marvel:
 - Watch your directories dance in excitement as they do your bidding!
 
 ## 🤤 A Visually Seductive Interface... Which is Not a Wierd Thing to Say!
+![border_change](https://github.com/user-attachments/assets/5f8a8b3b-d171-43a2-86d1-3a9a1f2e608a)
+
+- Dress the it down, if you're more into that sort of thing.
 - Entries fade based on distance from your selection
 - Customizable dimming intensity and distance (in code only at the moment)
 - Color and brightness preservation for important items
