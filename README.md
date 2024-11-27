@@ -7,6 +7,7 @@
 ## Features and Capabilities
 ## [I Don't Have Time! Summarize it for me!](#-tldr-feature-list)
 - [Terminal-based because real programmers dont click](#%EF%B8%8F-terminal-based-because-real-programmers-dont-click)
+- [Mouse Support: Because Real Programmers Don't Follow Arbitrary Stereotypes!](#️-mouse-support-because-real-programmers-dont-follow-arbitrary-stereotypes)
 - [Paint your files & directories with colors](#-paint-your-files--directories-with-colors)
 - [Shortcuts that actually make your life shorter in a good way](#-shortcuts-that-actually-make-your-life-shorter-in-a-good-way)
 - [Customizable keybindings bend the very interface to your will](#️-customizable-keybindings-bend-the-very-interface-to-your-will)
@@ -40,6 +41,39 @@ directory to perform more complex commands. With autocompletions and suggestions
 Return to StygianSift when you're done, no breadcrumbs needed. Who needs pointing devices
 when your coding-pinkies could bench more than you? Ask yourself, Why point-and-click
 when you can type-and-curse?
+
+## 🖱️ Mouse Support: Because Real Programmers Don't Follow Arbitrary Stereotypes!
+![mouse_context_menu](https://github.com/user-attachments/assets/ee04c5c1-1638-46f6-bf51-39454904edac)
+
+Quiet! Turns out gatekeeping input devices is about as logical as you deciding to read this
+far. Whether you're a vim wizard who types at the speed of thought or someone who 
+appreciates the occasional naughty mouse click, StygianSift says "¿por qué no los dos?"
+
+A decision that's sure to ruffle your neckbeard, I've added full mouse 
+support because I am lazy, and sometimes clicking things is super convenient! 
+I know, I know, heresy of the highest order. But hear me out:
+
+- You will have a right-click context menu just like any GUI, complete with all your
+  favorite file operations (and maybe some you probably didn't think existed)
+- Mouse tracking that respect the dimming system, because why use a mouse if you
+  miss out on all the bling!
+- Click-to-navigate when your other hand is busy!
+- Intuitive Multi-select because the mouse likes to pick and choose:
+  - Hold Ctrl and click to select the files you want, ignore the icky ones! 
+  - Previously selected files stay selected, because losing your careful selection is a pain 
+    we wouldn't wish on our worst enemies
+  - Drag-select multiple files like you're painting a masterpiece of productivity
+
+Think of this addition as a diplomatic attempt to bring our two worlds together!
+We care not if you use a mouse or a keyboard, in this realm, we believe in equal opportunity
+file management. Whether you're a keystroke virtuoso or a click connoisseur,
+you're welcome here.
+
+Besides, let's be honest - sometimes you're "eating a sandwich" with one hand and need to 
+manage files with the other. I know the struggle. StygianSift provides the solution.
+
+Real programmers use whatever tools make them most productive, even if that means 
+occasionally betraying the sacred commandments of terminal purism. Your workflow, your rules!
 
 ## 🎨 Paint Your Files & Directories with Colors
 ![image](https://github.com/user-attachments/assets/c2f5eb37-db4c-4706-9385-2a1ed3b8253c)
@@ -189,6 +223,16 @@ iambic pentameter).
 
 
 ## 💤 TLDR Feature List
+
+### Mouse Support Features
+- Right-click context menu for file operations
+- Dimming-aware mouse tracking and highlighting
+- Click-to-navigate directory traversal
+- Multiple selection methods:
+  - Click-to-select individual files
+  - Ctrl+click for non-contiguous selection
+  - Drag selection for ranges
+
 ### Core File Operations
 - Create files
 - Create directories
