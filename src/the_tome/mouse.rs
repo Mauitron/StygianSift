@@ -626,7 +626,7 @@ pub fn handle_mouse_event(
     start_y: u16,
     nav_width: u16,
 ) -> io::Result<Option<BrowseResult>> {
-    // Handle back button click first
+    // Handle back button click first, the graphical one.
     if let MouseEventKind::Down(MouseButton::Left) = event.kind {
         if let Some(action) =
             app_state
@@ -741,7 +741,6 @@ pub fn handle_mouse_event(
 
             if event.column < nav_width {
                 if let Some(clicked_index) = get_index_from_coordinates(event.row) {
-                    // Initialize selection if needed
                     if event.modifiers.contains(KeyModifiers::CONTROL) {
                         app_state.select_mode = true;
                         if app_state.multiple_selected_files.is_none() {
@@ -773,19 +772,18 @@ pub fn handle_mouse_event(
                         }
                     }
 
-                    // Update selection state
+            
                     app_state.selected_index = clicked_index;
                     app_state.mouse_state.last_click_pos = Some((event.column, event.row));
                     app_state.mouse_state.last_click_time = Instant::now();
                     app_state.mouse_state.drag_start = Some((event.column, event.row));
 
-                    // Initialize or clear selection based on Ctrl state
+                    
                     if !event.modifiers.contains(KeyModifiers::CONTROL) {
                         app_state.multiple_selected_files = Some(HashSet::new());
                         app_state.select_mode = false;
                     }
 
-                    // If Ctrl is held, toggle the clicked item
                     if event.modifiers.contains(KeyModifiers::CONTROL) {
                         if let Some(selected_files) = &mut app_state.multiple_selected_files {
                             if let Some(entry) = entries.get(clicked_index) {
@@ -821,7 +819,6 @@ pub fn handle_mouse_event(
                     ) {
                         app_state.mouse_state.is_dragging = true;
 
-                        // Initialize selection if needed
                         if app_state.multiple_selected_files.is_none() {
                             app_state.multiple_selected_files = Some(HashSet::new());
                         }
@@ -841,7 +838,6 @@ pub fn handle_mouse_event(
                                     }
                                 }
                             } else {
-                                // Regular drag behavior - clear and select new range
                                 selected.clear();
                                 for idx in range_start..=range_end {
                                     if let Some(entry) = entries.get(idx) {
