@@ -4,6 +4,11 @@
 
 ### If you like StygianSift or want to see more from me, please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
 
+[![Windows Support](https://img.shields.io/badge/Windows-Basic%20Support-yellowgreen?logo=windows&logoColor=white "Works on Windows but has limited testing")](docs/windows-support.md)
+![Linux Support](https://img.shields.io/badge/Linux-Supported-success?logo=linux&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Work%20In%20Progress-yellow)
+
+
 ## Features and Capabilities
 ## [I Don't Have Time! Summarize it for me!](#-tldr-feature-list)
 - [Terminal-based because real programmers dont click](#%EF%B8%8F-terminal-based-because-real-programmers-dont-click)
@@ -235,6 +240,10 @@ iambic pentameter).
   - Click-to-select individual files
   - Ctrl+click for non-contiguous selection
   - Drag selection for ranges
+
+### Window Support (beta)
+ - Should compile and work on Windows
+ - Not extensivly tested
 
 ### Core File Operations
 - Create files
