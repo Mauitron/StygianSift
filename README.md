@@ -48,7 +48,7 @@ when your coding-pinkies could bench more than you? Ask yourself, Why point-and-
 when you can type-and-curse?
 
 ## 🖱️ Mouse Support: Because Real Programmers Don't Follow Arbitrary Stereotypes!
-![mouse_context_menu](https://github.com/user-attachments/assets/ee04c5c1-1638-46f6-bf51-39454904edac)
+![context_menu](https://github.com/user-attachments/assets/bd3abe43-575b-4b46-bae9-35fa8b26115a)
 
 Quiet! Turns out gatekeeping input devices is about as logical as you deciding to read this
 far. Whether you're a vim wizard who types at the speed of thought or someone who 
