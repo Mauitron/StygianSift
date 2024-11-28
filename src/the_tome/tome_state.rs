@@ -124,17 +124,6 @@ impl AppState {
         })
     }
 
-    fn handle_entry_activation(&mut self, entry: &FileEntry) -> io::Result<Option<BrowseResult>> {
-        if entry.file_type == FileType::Directory {
-            self.current_dir = entry.path.clone();
-            self.selected_index = 0;
-            self.scroll_state.offset = 0;
-            Ok(None)
-        } else {
-            self.execute_file(&mut stdout(), &entry.path)?;
-            Ok(None)
-        }
-    }
     pub fn display_current_layer(&self, stdout: &mut impl Write) -> io::Result<()> {
         let (width, height) = size()?;
         let nav_width = width / 2;

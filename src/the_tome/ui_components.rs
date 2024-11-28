@@ -1120,7 +1120,7 @@ pub fn write_entry(
             write!(
                 stdout,
                 "{:1} {} {:<width$} {:>10} {} {}",
-                if is_selected { " → " } else if is_multi_selected { " * " } else { "   " }, 
+                if is_selected { " →  " } else if is_multi_selected { " *   " } else { "   " }, 
                 icon,
                 truncated_name,
                 size_str,
@@ -1151,7 +1151,7 @@ pub fn write_entry(
             write!(
                 stdout,
                 "{} {} {:<width$} {:>10} {} {}",
-                if is_hovered { " ≫ " } else if is_multi_selected { " * " } else { "   " },  
+                if is_hovered { "    " } else if is_multi_selected { " * " } else { "   " },  
                 icon,
                 truncated_name,
                 size_str,
@@ -1171,6 +1171,7 @@ pub fn write_entry(
     
     Ok(())
 }
+
 pub fn display_directory(
     app_state: &mut AppState,
     entries: &[FileEntry],
@@ -1190,8 +1191,8 @@ pub fn display_directory(
     let total_entries = entries.len();
     let visible_lines = (end_y - start_y) as usize;
     let selected_index = selected_index;
-    let adjusted_selected_index = selected_index.min(total_entries.saturating_sub(1));
     let middle_line = visible_lines / 2;
+    let adjusted_selected_index = selected_index.min(total_entries.saturating_sub(1));
 
     let dimming_config = DimmingConfig::new(visible_lines, &app_state.config);
 
@@ -1272,6 +1273,7 @@ pub fn display_directory(
             }
         })
         .collect();
+
     if app_state.mouse_state.context_menu.is_none() {
         for (y, output) in output_data {
             let mut stdout_guard = stdout_mutex.lock().unwrap();
@@ -1307,7 +1309,23 @@ pub fn display_directory(
         stdout.flush()?;
     }
 
-    if let Some(entry) = entries.get(adjusted_selected_index) {
+    let preview_entry = match app_state.input_mode {
+        InputMode::Keyboard => entries.get(adjusted_selected_index),
+        InputMode::Mouse => {
+            if let Some((_, y)) = app_state.mouse_state.last_click_pos {
+                let clicked_index = (y - start_y + 2) as usize + app_state.scroll_state.offset;
+                if clicked_index < entries.len() {
+                    entries.get(clicked_index)
+                } else {
+                    entries.get(adjusted_selected_index)
+                }
+            } else {
+                entries.get(adjusted_selected_index)
+            }
+        }
+    };
+
+    if let Some(entry) = preview_entry {
         if app_state.preview_active && app_state.mouse_state.context_menu.is_none() {
             display_file_info_or_preview(
                 app_state,
@@ -1335,7 +1353,6 @@ pub fn display_directory(
 
     stdout.flush()
 }
-
 pub fn display_folder_preview(
     path: &Path,
     stdout: &mut impl Write,
