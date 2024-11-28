@@ -1628,10 +1628,10 @@ pub fn interaction_field(fmt: fmt::Arguments) -> io::Result<()> {
     let preview_width = width - nav_width - 1;
     let mut stdout = stdout();
 
-    queue!(stdout, MoveTo(preview_width + 2, height - 12))?;
+    queue!(stdout, MoveTo(preview_width + 1, height - 12))?;
     write!(stdout, "{}", "-".repeat((preview_width - 5).into()).green())?;
 
-    queue!(stdout, MoveTo(preview_width + 2, height - 11))?;
+    queue!(stdout, MoveTo(preview_width + 1, height - 11))?;
     write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
 
     queue!(
@@ -1643,10 +1643,10 @@ pub fn interaction_field(fmt: fmt::Arguments) -> io::Result<()> {
     )?;
     write!(stdout, "{}", input)?;
 
-    queue!(stdout, MoveTo(preview_width + 2, height - 9))?;
+    queue!(stdout, MoveTo(preview_width + 1, height - 9))?;
     write!(stdout, "{}", " ".repeat((preview_width - 5).into()))?;
 
-    queue!(stdout, MoveTo(preview_width + 2, height - 8))?;
+    queue!(stdout, MoveTo(preview_width + 1, height - 8))?;
     write!(stdout, "{}", "-".repeat((preview_width - 5).into()).green())?;
 
     stdout.flush()?;

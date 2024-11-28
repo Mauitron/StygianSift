@@ -559,16 +559,6 @@ pub fn check_admin_required_cross_platform(path: &Path) -> io::Result<bool> {
 
     Ok(admin_required)
 }
-pub fn initialize_terminal() -> io::Result<()> {
-    terminal::enable_raw_mode()?;
-    execute!(
-        stdout(),
-        EnterAlternateScreen,
-        EnableMouseCapture,
-        event::EnableBracketedPaste
-    )?;
-    Ok(())
-}
 
 pub fn cleanup_terminal() -> io::Result<()> {
     let mut stdout = io::stdout();

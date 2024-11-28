@@ -314,21 +314,23 @@ pub fn edit_config(
             }
         }
 
-        execute!(stdout, MoveTo(preview_width + 3, height - 12))?;
+        execute!(stdout, MoveTo(preview_width + 2, height - 12))?;
         writeln!(
             stdout,
             "{}\r",
-            "-".repeat((preview_width - 6) as usize).green()
+            "-".repeat((preview_width - 4) as usize).green()
         )?;
-        execute!(stdout, MoveTo(preview_width + 3, height - 11))?;
+
+        execute!(stdout, MoveTo(preview_width + 4, height - 11))?;
         writeln!(stdout, "Use ↑↓ (or k/j) to navigate")?;
-        execute!(stdout, MoveTo(preview_width + 3, height - 10))?;
+        execute!(stdout, MoveTo(preview_width + 4, height - 10))?;
         writeln!(stdout, "Press Enter to select, ESC to return")?;
-        execute!(stdout, MoveTo(preview_width + 3, height - 9))?;
+
+        execute!(stdout, MoveTo(preview_width + 2, height - 9))?;
         writeln!(
             stdout,
             "{}\r",
-            "-".repeat((preview_width - 6) as usize).green()
+            "-".repeat((preview_width - 4) as usize).green()
         )?;
 
         stdout.flush()?;
@@ -1290,11 +1292,11 @@ pub fn execute_terminal_command(
     let mut terminal_output: VecDeque<(String, bool)> = VecDeque::new();
     let mut autocomplete = Autocomplete::new();
     let dimming_config = DimmingConfig::new(5, &app_state.config); // visible suggestions. maybe more is better?
-                                                                   // let _ = clear_preview();
-    let _ = clear_interaction_field();
-    queue!(stdout, MoveTo(preview_width + 3, height - 13))?;
+    let _ = clear_preview();
+    // let _ = clear_interaction_field();
+    queue!(stdout, MoveTo(preview_width + 2, height - 13))?;
     write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
-    queue!(stdout, MoveTo(preview_width + 3, height - 7))?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 7))?;
     write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
 
     execute!(stdout, cursor::Show)?;
@@ -1342,7 +1344,7 @@ pub fn execute_terminal_command(
             execute!(stdout, SetForegroundColor(color))?;
             write!(stdout, "{}", c)?;
         }
-        // need to make the cursor more visible at the start
+
         queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
         execute!(stdout, SetForegroundColor(Color::Green))?;
         write!(stdout, ">")?;
@@ -1376,6 +1378,19 @@ pub fn execute_terminal_command(
             return Ok(());
         }
 
+        let window_size = max_suggestions;
+        let half_window = window_size / 2;
+
+        let start_index = if current_index >= half_window {
+            if current_index + half_window < suggestions.len() {
+                current_index - half_window
+            } else {
+                suggestions.len().saturating_sub(window_size)
+            }
+        } else {
+            0
+        };
+
         let get_color = |distance: i32| -> Color {
             match distance.abs() {
                 0 => Color::Rgb {
@@ -1403,16 +1418,17 @@ pub fn execute_terminal_command(
 
         for (i, suggestion) in suggestions
             .iter()
-            .skip(current_index.saturating_sub(2))
-            .take(max_suggestions)
+            .skip(start_index)
+            .take(window_size)
             .enumerate()
         {
-            let relative_pos = i as i32 - 2;
+            let display_index = start_index + i;
+            let relative_pos = display_index as i32 - current_index as i32;
             let color = get_color(relative_pos);
 
             queue!(stdout, MoveTo(suggestion_x, suggestion_y + i as u16 - 2))?;
 
-            if i == 2 && current_index >= 2 {
+            if display_index == current_index {
                 execute!(stdout, SetForegroundColor(color))?;
                 write!(stdout, "→ {}\r", suggestion.clone().dark_green())?;
                 write!(stdout, "{}", " ".repeat(suggestion.len() / 35))?;
@@ -1426,20 +1442,49 @@ pub fn execute_terminal_command(
         stdout.flush()?;
         Ok(())
     }
-
     fn handle_command(
         command: &str,
+        current_dir: &mut Path,
+        selected_index: &mut usize,
         app_state: &mut AppState,
         terminal_output: &mut VecDeque<(String, bool)>,
         stdout: &mut impl Write,
     ) -> io::Result<()> {
         let parts: Vec<&str> = command.split_whitespace().collect();
-
+        let sort = app_state.config.default_sort.clone();
         if parts.is_empty() {
             return Ok(());
         }
 
         match parts[0] {
+            ".." => {
+                let _ = handle_move_left(
+                    app_state,
+                    &mut current_dir.to_path_buf(),
+                    selected_index,
+                    &mut 0,
+                    &mut false,
+                    &sort,
+                    stdout,
+                );
+
+                if let Ok(entries) = fs::read_dir(&app_state.current_dir) {
+                    let entries: Vec<FileEntry> = entries
+                        .filter_map(|entry| entry.ok())
+                        .filter_map(|entry| FileEntry::new(entry.path()).ok())
+                        .collect();
+                    display_directory(
+                        app_state,
+                        &entries,
+                        &app_state.current_dir.clone(),
+                        app_state.selected_index,
+                        stdout,
+                        app_state.scroll_state.offset,
+                        app_state.lines,
+                        true,
+                    )?;
+                }
+            }
             "cd" => {
                 let new_dir = if parts.len() < 2 {
                     return Ok(());
@@ -1536,9 +1581,9 @@ pub fn execute_terminal_command(
         }
         Ok(())
     }
-    queue!(stdout, MoveTo(preview_width + 3, height - 13))?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 13))?;
     write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
-    queue!(stdout, MoveTo(preview_width + 3, height - 7))?;
+    queue!(stdout, MoveTo(preview_width + 2, height - 7))?;
     write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
     let mut command_buffer = String::new();
     let mut last_tab_word = String::new();
@@ -1549,7 +1594,7 @@ pub fn execute_terminal_command(
                 execute!(stdout, cursor::Hide)?;
                 let _ = clear_interaction_field();
 
-                if let Ok(entries) = fs::read_dir(&app_state.current_dir) {
+                if let Ok(entries) = fs::read_dir(&app_state.last_browsed_dir) {
                     let entries: Vec<FileEntry> = entries
                         .filter_map(|entry| entry.ok())
                         .filter_map(|entry| FileEntry::new(entry.path()).ok())
@@ -1718,7 +1763,14 @@ pub fn execute_terminal_command(
                     terminal_output.pop_front();
                 }
 
-                handle_command(&command, app_state, &mut terminal_output, stdout)?;
+                handle_command(
+                    &command,
+                    &mut app_state.current_dir.clone(),
+                    &mut 0,
+                    app_state,
+                    &mut terminal_output,
+                    stdout,
+                )?;
                 let _ = clear_preview();
                 queue!(stdout, MoveTo(nav_width + 4, (height - 14) as u16))?;
                 terminal_output.push_back((format!("> {}", command.clone().red()), false));
@@ -1739,9 +1791,9 @@ pub fn execute_terminal_command(
                 }
 
                 command_buffer.clear();
-                queue!(stdout, MoveTo(preview_width + 3, height - 13))?;
+                queue!(stdout, MoveTo(preview_width + 2, height - 13))?;
                 write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
-                queue!(stdout, MoveTo(preview_width + 3, height - 7))?;
+                queue!(stdout, MoveTo(preview_width + 2, height - 7))?;
                 write!(stdout, "{}", "-".repeat((preview_width - 4).into()).green())?;
                 queue!(stdout, MoveTo(nav_width + 4, height - 10))?;
                 write!(stdout, "{}", "> ")?;
@@ -1751,7 +1803,6 @@ pub fn execute_terminal_command(
         }
         stdout.flush()?;
     }
-
     Ok(())
 }
 pub fn open_terminal_command(app_state: &mut AppState, stdout: &mut impl Write) -> io::Result<()> {
