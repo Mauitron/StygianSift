@@ -38,7 +38,7 @@ muttering about directory structures, this isn't your average file manager. It's
 dream of functionality wrapped in a user interface that actually makes sense.
 
 ## 🖥️ Terminal-based Because Real Programmers Dont Click
-![image](https://github.com/user-attachments/assets/66536496-b964-4239-96b0-6bb6409c6554)
+![terminal_within](https://github.com/user-attachments/assets/44c0800b-80d6-4d5e-8549-67e48cfa049d)
 
 Embrace the command line, mortal! Navigate your files with the wild abandon of the 
 caffeinated genius that you are! If you need more, summon the terminal within the selected 
