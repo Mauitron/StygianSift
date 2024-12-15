@@ -37,7 +37,7 @@ Created by a slightly unhinged boatman who spent way too much time ferrying soul
 muttering about directory structures, this isn't your average file manager. It's a fever 
 dream of functionality wrapped in a user interface that actually makes sense.
 
-🪶 Dependencies: A Tale of Two Libraries
+## 🪶 Dependencies: A Tale of Two Libraries
 In my eternal quest to keep things simple (unlike my relationship with the other underworld deities),
 StygianSift relies on just two dependencies:
 
