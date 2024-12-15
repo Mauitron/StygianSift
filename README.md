@@ -37,6 +37,17 @@ Created by a slightly unhinged boatman who spent way too much time ferrying soul
 muttering about directory structures, this isn't your average file manager. It's a fever 
 dream of functionality wrapped in a user interface that actually makes sense.
 
+🪶 Dependencies: A Tale of Two Libraries
+In my eternal quest to keep things simple (unlike my relationship with the other underworld deities),
+StygianSift relies on just two dependencies:
+
+crossterm - Because someone had to tame the terminal chaos
+rayon - A temporary companion for parallel operations, soon to be replaced by std's native features
+
+Yes, you heard that right - just two! And soon to be one, as rayon prepares for its journey across
+the Styx. Who needs a bloated cargo manifest when you have the raw power of the Rust standard library?
+Now, back to our regularly scheduled file management madness...
+
 ## 🖥️ Terminal-based Because Real Programmers Dont Click
 ![terminal_within](https://github.com/user-attachments/assets/44c0800b-80d6-4d5e-8549-67e48cfa049d)
 
