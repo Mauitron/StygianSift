@@ -4,7 +4,7 @@
 
 ### If you like StygianSift or want to see more from me, please consider buying me a [Coffee](https://buymeacoffee.com/charon0) ☕
 
-[![Windows Support](https://img.shields.io/badge/Windows-Basic%20Support-yellowgreen?logo=windows&logoColor=white "Works on Windows but has limited testing")](docs/windows-support.md)
+[![Windows Support](https://img.shields.io/badge/Windows-Should%20Work-yellowgreen?logo=windows&logoColor=white "Works on Windows but has limited testing")](docs/windows-support.md)
 ![Linux Support](https://img.shields.io/badge/Linux-Supported-success?logo=linux&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Work%20In%20Progress-yellow)
 
