@@ -41,10 +41,10 @@ dream of functionality wrapped in a user interface that actually makes sense.
 In my eternal quest to keep things simple (unlike my relationship with my oar),
 StygianSift relies on just two dependencies
 
-### Crossterm
+#### Crossterm
 Because someone had to tame the terminal chaos
 
-### Rayon 
+#### Rayon 
 A temporary companion for parallel operations,
 soon to be replaced by std's native features
 
